@@ -89,7 +89,7 @@ return (
             </p>
             <div className="flex items-center gap-6">
             <span className="hover:text-emerald-400 cursor-default transition-colors">Next.js</span>
-            <span className="hover:text-blue-400 cursor-default transition-colors">Tailwind CSS</span>
+            <span className="hover:text-blue-400 cursor-default transition-colors">Django</span>
             <span className="text-slate-700">|</span>
             <span className="text-slate-400 italic font-serif lowercase">DreamHome Case Study</span>
             </div>
