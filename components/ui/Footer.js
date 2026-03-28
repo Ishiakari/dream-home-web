@@ -11,6 +11,7 @@ const Footer = () => {
         { name: 'List Your Property', href: '/services/owners' },
         { name: 'List Your Property', href: '/services/owners' },
         { name: 'Lease Terms', href: '/legal/lease-info' },
+        { name: 'Area Search', href: '/search' },
     ],
     resources: [
 
