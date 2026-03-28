@@ -19,3 +19,7 @@ const Footer = () => {
         { name: 'Privacy Policy', href: '/privacy' },
     ]
 };
+
+return (
+    
+);
