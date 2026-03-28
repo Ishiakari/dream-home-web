@@ -6,7 +6,7 @@ const PublicFooter = () => {
     const footerLinks = {
         explore: [
         { name: 'Featured Flats', href: '/properties/flats' }, 
-        { name: 'House Listings', href: '/properties/houses' }, // DreamHome also manages houses [cite: 69]
+        { name: 'House Listings', href: '/properties/houses' }, 
         { name: 'Branch Locations', href: '/branches' }, // Several offices throughout the UK 
         { name: 'How it Works', href: '/about' },
         ],
