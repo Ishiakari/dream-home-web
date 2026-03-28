@@ -51,8 +51,8 @@ const FOOTER_CONFIG = {
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
                 Simplifying the rental journey across the United Kingdom. 
-                From furnished flats to spacious houses[cite: 56, 69], we connect quality renters 
-                with premier property owners[cite: 3].
+                From furnished flats to spacious houses, we connect quality renters 
+                with premier property owners.
             </p>
             </div>
 
