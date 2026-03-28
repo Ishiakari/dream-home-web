@@ -7,7 +7,7 @@ const PublicFooter = () => {
         explore: [
         { name: 'Featured Flats', href: '/properties/flats' }, 
         { name: 'House Listings', href: '/properties/houses' }, 
-        { name: 'Branch Locations', href: '/branches' }, // Several offices throughout the UK 
+        { name: 'Branch Locations', href: '/branches' }, 
         { name: 'How it Works', href: '/about' },
         ],
         services: [
