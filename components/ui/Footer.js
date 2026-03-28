@@ -52,7 +52,7 @@ const PublicFooter = () => {
                 <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
                 Simplifying the rental journey across the United Kingdom. 
                 From furnished flats to spacious houses, we connect quality renters 
-                with premier property owners[cite: 3, 56].
+                with premier property owners.
                 </p>
             </div>
 
