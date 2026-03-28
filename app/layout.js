@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "DreamHome",
+  title: "DreamHome | UK Property Management",
   description: "Specializing in the management of furnished properties for rent across the UK.",
 };
 
