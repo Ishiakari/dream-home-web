@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const Footer = () => {
     explore:[
-        { name: 'Home', href: '/' },
+        { name: 'Featured Flats', href: '/properties/flats' },
         { name: 'Properties', href: '/properties' },
 
     ], 
