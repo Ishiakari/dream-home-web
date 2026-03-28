@@ -1,6 +1,13 @@
 import Link from 'next/link';
 
 const Footer = () => {
-    explore:[], 
-    
+    explore:[
+
+    ], 
+    operations: [
+
+    ],
+    resources: [
+        
+    ]
 };
