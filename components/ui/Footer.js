@@ -9,7 +9,7 @@ const FOOTER_CONFIG = {
         links: [
             { name: 'Featured Flats', href: '#' },
             { name: 'House Listings', href: '#' },
-            { name: 'Branch Locations', href: '/branches' },
+            { name: 'Branch Locations', href: '#' },
             { name: 'How it Works', href: '/about' },
         ],
         },
