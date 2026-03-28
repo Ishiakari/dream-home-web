@@ -86,7 +86,7 @@ return (
         {/* Bottom Bar */}
         <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-medium text-slate-500 uppercase tracking-widest">
             <p>
-            © {currentYear} John Lloyd Canoy. All rights reserved.
+            © {currentYear}. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
             <span className="hover:text-emerald-400 cursor-default transition-colors">Next.js</span>
