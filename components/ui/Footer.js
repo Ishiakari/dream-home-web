@@ -16,10 +16,10 @@ const FOOTER_CONFIG = {
         {
         title: 'Services',
         links: [
-            { name: 'List Your Property', href: '/services/owners' },
-            { name: 'Renter Guide', href: '/services/renters' },
-            { name: 'Lease Terms', href: '/legal/lease-info' },
-            { name: 'Area Search', href: '/search' },
+            { name: 'List Your Property', href: '#' },
+            { name: 'Renter Guide', href: '#' },
+            { name: 'Lease Terms', href: '#' },
+            { name: 'Area Search', href: '#' },
         ],
         },
         {
