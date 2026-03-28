@@ -50,7 +50,7 @@ const PublicFooter = () => {
                 Dream<span className="text-emerald-400">Home</span>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
-                Simplifying the rental journey across the United Kingdom[cite: 8]. 
+                Simplifying the rental journey across the United Kingdom. 
                 From furnished flats to spacious houses, we connect quality renters 
                 with premier property owners[cite: 3, 56].
                 </p>
