@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from '@/components/ui/NavBar';
+import PublicFooter from "@/components/ui/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
       <main className="flex-grow">
           {children}
         </main> 
+        <PublicFooter />
 
     </html>
   );
