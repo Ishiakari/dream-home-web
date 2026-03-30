@@ -5,7 +5,7 @@ export default function HomePage() {
     <div className="flex flex-col items-center w-full px-4 md:px-8">
       
       {/* Hero Section */}
-      <section className="text-center max-w-4xl mx-auto mt-20 md:mt-32 mb-12 space-y-6">
+      <section className="text-center max-w-4xl mx-auto mt-20 md:mt-10 mb-12 space-y-6">
         <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight">
           Find your perfect <span className="text-[#E11553]">DreamHome</span>
         </h1>
