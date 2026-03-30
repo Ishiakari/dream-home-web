@@ -26,13 +26,13 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
         <NavBar />
-      </body>
-      
-      <main className="flex-grow">
+        
+        <main className="flex-grow">
           {children}
         </main> 
+        
         <PublicFooter />
-
+      </body>
     </html>
   );
 }
