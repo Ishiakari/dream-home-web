@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { X, User, Home } from "lucide-react";
+import { registerClient } from "../../lib/authService"; 
 
 // Reusable Input Component 
 const FormInput = ({ label, type = "text", name, value, onChange, required = true, ...props }) => (
-  <div className="w-full">
+  <div className="w-full">  
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     <input
       type={type}
