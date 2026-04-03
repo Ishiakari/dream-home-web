@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { loginClient } from "../../lib/authService";
+import { useRouter } from "next/navigation";
 
 // Reusable Input Component (Placeholder prop removed)
 const FormInput = ({ label, type = "text", name, value, onChange, required = true }) => (
@@ -126,4 +127,4 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
       </div>
     </div>
   );
-}
+}
