@@ -6,7 +6,6 @@ import { loginClient } from "../../lib/authService";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 
-// Reusable Input Component (Placeholder prop removed)
 const FormInput = ({ label, type = "text", name, value, onChange, required = true }) => (
   <div className="w-full">
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -22,6 +21,7 @@ const FormInput = ({ label, type = "text", name, value, onChange, required = tru
 );
 
 export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
+  const router = useRouter();
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -35,7 +35,6 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
     return () => { document.body.style.overflow = "unset"; };
   }, [isOpen]);
 
-  // Reset error when dialog reopens
   useEffect(() => {
     if (!isOpen) setError("");
   }, [isOpen]);
@@ -44,7 +43,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
-    setError(""); // Clear error when user starts typing
+    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -53,11 +52,20 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
     setError("");
 
     try {
-      await loginClient(credentials.email, credentials.password);
-      // Tokens are stored in localStorage by loginClient
+      const data = await loginClient(credentials.email, credentials.password);
+      
+      const decoded = jwtDecode(data.access);
+      const userRole = decoded.role?.toLowerCase();
+
       onClose();
-      // Optionally reload to update UI with logged-in state
-      window.location.reload();
+
+      if (userRole === "renter") {
+        router.push("/dashboard/renter");
+      } else if (userRole === "owner") {
+        router.push("/dashboard/owner");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -69,7 +77,6 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
         
-        {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-gray-100">
           <h3 className="font-bold text-gray-900 text-xl">Welcome back</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors">
@@ -78,7 +85,6 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
         </div>
 
         <div className="p-6">
-          {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <FormInput 
               label="Email address" 
@@ -100,7 +106,6 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
               <a href="#" className="text-sm text-[#E11553] hover:underline">Forgot password?</a>
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 {error}
@@ -117,7 +122,6 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToSignup }) {
           </form>
         </div>
 
-        {/* Footer */}
         <div className="p-5 border-t border-gray-100 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <button type="button" onClick={onSwitchToSignup} className="text-[#E11553] font-semibold hover:underline">
