@@ -163,8 +163,8 @@ export default function SignupDialog({ isOpen, onClose, onSwitchToLogin }) {
 
             {/* Success Message */}
             {success && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                Account created successfully! Redirecting to login...
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm animate-pulse">
+                Account created! Taking you to your dashboard...
               </div>
             )}
 
