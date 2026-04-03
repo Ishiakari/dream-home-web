@@ -45,6 +45,7 @@ export const useSignupForm = (activeRole) => {
 
     } catch (err) {
       setError(err.message || "An error occurred during signup.");
+      setSuccess(false);
       setIsLoading(false); 
     }
   };
