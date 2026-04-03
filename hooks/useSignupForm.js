@@ -10,7 +10,7 @@ export const useSignupForm = (activeRole) => {
   
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phone: "",
-    gender: "", birthdate: "", password: "",
+    gender: "", birthdate: "", password: "", address: "",
   });
 
   const handleChange = (e) => {
