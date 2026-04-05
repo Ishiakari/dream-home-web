@@ -4,7 +4,7 @@ import BlogCard from '../components/cards/BlogCard';
 
 export default function HomePage() {
   
-  // 2. Create dummy data representing what Django will eventually send
+  // 1. Property Dummy Data
   const dummyProperties = [
     { id: 'PG4', type: 'Flat', city: 'Glasgow', street: '6 Lawrence St', postcode: 'G11 9QX', noOfRooms: 3, status: 'Available', monthlyRent: 450 },
     { id: 'PA14', type: 'House', city: 'Aberdeen', street: '16 Holburn', postcode: 'AB1 5XX', noOfRooms: 6, status: 'Available', monthlyRent: 650 },
@@ -12,6 +12,7 @@ export default function HomePage() {
     { id: 'PG21', type: 'House', city: 'Glasgow', street: '18 Dale Rd', postcode: 'G12', noOfRooms: 5, status: 'Rented', monthlyRent: 600 },
   ];
 
+  // 2. Blog/Testimonial Dummy Data
   const blogData = [
     {
       id: 1,
@@ -20,7 +21,7 @@ export default function HomePage() {
       rating: 5,
       authorName: "John Lloyd Canoy",
       authorRole: "Renter",
-      authorImage: "/PlaceHolderPic.png" // Replace with real profile pic later
+      authorImage: "/PlaceHolderPic.png" 
     },
     {
       id: 2,
@@ -43,9 +44,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col items-center w-full px-4 md:px-8">
+    <div className="flex flex-col items-center w-full px-4 md:px-8 bg-white">
       
-      {/* Hero Section (Unchanged) */}
+      {/* Hero Section */}
       <section className="text-center max-w-4xl mx-auto mt-20 md:mt-10 mb-12 space-y-6">
         <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight">
           Find your perfect <span className="text-[#E11553]">DreamHome</span>
@@ -55,36 +56,33 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Search Bar Container (Unchanged) */}
+      {/* Search Bar Container */}
       <div className="w-full max-w-4xl relative z-10">
         <PrimarySearchBar />
       </div>
 
-      {/* 3. The Updated Properties Section */}
+      {/* 3. Properties Section */}
       <section className="w-full max-w-7xl mx-auto mt-32">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Explore Destinations</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-8">Explore Destinations</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          
-          {/* We loop through the dummy data to generate the cards dynamically! */}
           {dummyProperties.map((prop) => (
               <PropertyCard key={prop.id} property={prop} />
           ))}
-
         </div>
       </section>
 
-      {/* 4. The Updated Blog Section */}
-      <section className="w-full max-w-7xl mx-auto mt-32">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Latest from our Blog</h2>
+      {/* 4. Blog Section with increased spacing */}
+      <section className="w-full max-w-7xl mx-auto mt-44 mb-32">
+        <div className="mb-10">
+          <h2 className="text-3xl font-extrabold text-gray-900">Latest from our Blog</h2>
+          <p className="text-gray-500 mt-2 text-lg">Hear from our satisfied renters and property owners across the UK.</p>
+        </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          
-          {/* We loop through the blog data to generate the cards dynamically! */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {blogData.map((blog) => (
               <BlogCard key={blog.id} blog={blog} />
           ))}
-
         </div>
       </section>
 
