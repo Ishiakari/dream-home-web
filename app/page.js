@@ -62,11 +62,11 @@ export default function HomePage() {
       </motion.div>
 
       {/* Intro Image (Faded Bottom, overlapping the search bar slightly) */}
+      {/* Negative top margin (-mt-16) pulls it UP behind the search bar */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-        // Negative top margin (-mt-16) pulls it UP behind the search bar
         className="w-full max-w-5xl relative z-10 -mt-16 md:-mt-24 h-[400px] md:h-[600px]"
       >
         <Image 
