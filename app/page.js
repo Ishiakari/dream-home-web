@@ -1,7 +1,7 @@
 'use client'; // Required for Framer Motion
 
 import { motion } from 'framer-motion';
-import Image from 'next/image'; // Required for the new hero image
+import Image from 'next/image';
 import PrimarySearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '../components/cards/PropertyCard';
 import BlogCard from '../components/cards/BlogCard';
@@ -9,6 +9,7 @@ import AccordionItem from '@/components/ui/AccordionItem';
 import WhyChooseUs from '@/components/ui/WhyChooseUs';
 
 export default function HomePage() {
+
   // 1. Dummy data for properties
   const dummyProperties = [
     { id: 'PG4', type: 'Flat', city: 'Glasgow', street: '6 Lawrence St', postcode: 'G11 9QX', noOfRooms: 3, status: 'Available', monthlyRent: 450 },
@@ -32,12 +33,11 @@ export default function HomePage() {
   ];
 
   return (
-    // Added overflow-hidden to prevent horizontal scrolling during animations
     <div className="flex flex-col items-center w-full px-4 md:px-8 bg-white overflow-hidden">
-      
+
       {/* --- HERO SECTION (Animates on Load) --- */}
-      
-      <motion.section 
+
+      <motion.section
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -52,7 +52,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* Search Bar Container */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
@@ -62,19 +62,18 @@ export default function HomePage() {
       </motion.div>
 
       {/* Intro Image (Faded Bottom, overlapping the search bar slightly) */}
-      {/* Negative top margin (-mt-16) pulls it UP behind the search bar */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
         className="w-full max-w-5xl relative z-10 -mt-16 md:-mt-24 h-[400px] md:h-[600px]"
       >
-        <Image 
-          src="/PropertyExampleIntro.jpg" 
-          alt="DreamHome Intro" 
-          fill 
+        <Image
+          src="/PropertyExampleIntro.jpg"
+          alt="DreamHome Intro"
+          fill
           className="object-cover rounded-[3rem] opacity-70"
-          priority 
+          priority
         />
         {/* Gradient overlay to smoothly blend the image into the white page */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent rounded-[3rem]"></div>
@@ -84,7 +83,7 @@ export default function HomePage() {
       {/* --- SCROLL SECTIONS (Animates when scrolled into view) --- */}
 
       {/* Properties Section */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -94,12 +93,12 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold text-gray-800 mb-8">Explore Destinations</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {dummyProperties.map((prop) => (
-              <PropertyCard key={prop.id} property={prop} />
+            <PropertyCard key={prop.id} property={prop} />
           ))}
         </div>
       </motion.section>
 
-      {/* Why Choose Us (Wrapped in motion for scroll animation) */}
+      {/* Why Choose Us */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -111,7 +110,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Blog Section */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -124,13 +123,13 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {blogData.map((blog) => (
-              <BlogCard key={blog.id} blog={blog} />
+            <BlogCard key={blog.id} blog={blog} />
           ))}
         </div>
       </motion.section>
 
       {/* FAQ Section */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -144,10 +143,10 @@ export default function HomePage() {
 
         <div className="space-y-2 border-t border-gray-200">
           {faqData.map((faq) => (
-            <AccordionItem 
-              key={faq.id} 
-              title={faq.title} 
-              content={faq.content} 
+            <AccordionItem
+              key={faq.id}
+              title={faq.title}
+              content={faq.content}
             />
           ))}
         </div>
