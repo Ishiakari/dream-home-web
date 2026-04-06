@@ -48,12 +48,12 @@ const NavBar = () => {
           </Link>
 
           {/* MIDDLE SECTION: DESKTOP DROPDOWN MENUS */}
-          <div className="hidden lg:flex items-center gap-8 flex-1 justify-center">
+          <div className="hidden lg:flex items-centear gap-8 flex-1 justify-center">
             <Link
               href="/"
               className={`text-sm font-semibold transition-colors hover:text-blue-200 ${isActive('/') ? 'text-white underline underline-offset-8 decoration-2' : 'text-white/90'}`}
             >
-              Home
+              Home dsadasdasdasadsa
             </Link>
 
             {menuData.map((menu) => (
