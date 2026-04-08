@@ -10,7 +10,7 @@ const NavBar = () => {
   const pathname = usePathname();
   const [activeDropdown, setActiveDropdown] = useState(null);
   
-  // NEW: State to control the mobile menu
+  // State to control the mobile menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -48,10 +48,11 @@ const NavBar = () => {
           </Link>
 
           {/* MIDDLE SECTION: DESKTOP DROPDOWN MENUS */}
-          <div className="hidden lg:flex items-centear gap-8 flex-1 justify-center">
+          <div className="hidden lg:flex items-center gap-8 flex-1 justify-center">
+            
             <Link
               href="/"
-              className={`text-sm font-semibold transition-colors hover:text-blue-200 ${isActive('/') ? 'text-white underline underline-offset-8 decoration-2' : 'text-white/90'}`}
+              className={`py-2 text-sm font-semibold transition-colors hover:text-blue-200 ${isActive('/') ? 'text-white underline underline-offset-8 decoration-2' : 'text-white/90'}`}
             >
               Home 
             </Link>
@@ -99,7 +100,7 @@ const NavBar = () => {
               Sign in
             </button>
 
-            {/* NEW: MOBILE HAMBURGER BUTTON (Only visible on screens smaller than 'lg') */}
+            {/* MOBILE HAMBURGER BUTTON */}
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 text-white hover:text-blue-200 focus:outline-none"
@@ -123,7 +124,7 @@ const NavBar = () => {
 
         </div>
 
-        {/* NEW: MOBILE MENU DROPDOWN (Only visible when hamburger is clicked) */}
+        {/* MOBILE MENU DROPDOWN */}
         {isMobileMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-[#003580] border-t border-blue-800 shadow-xl pb-6 px-6 flex flex-col z-[60]">
             <Link 
@@ -152,7 +153,7 @@ const NavBar = () => {
               </div>
             ))}
             
-            {/* Show "List your property" on mobile since it was hidden on small screens */}
+            {/* Show "List your property" on mobile */}
             <Link 
               href="/list-property" 
               onClick={() => setIsMobileMenuOpen(false)}
