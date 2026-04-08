@@ -8,6 +8,12 @@ export default function PropertyCard({ property }) {
             
             {/* Image Section */}
             <div className="relative h-56 w-full">
+                
+            {/* --- LABEL HEHE --- */}
+                <span className="absolute top-4 right-4 z-10 bg-[#0A4DA1] text-white px-4 py-1.5 rounded-md text-sm font-medium shadow-sm pointer-events-none">
+                      {property.monthlyRent > 1000 ? "For sale" : "For rent"} 
+                </span>
+            {/* ------------------------- */}
             <Image 
                 src="/PlaceHolderPic.png" 
                 alt={`Property in ${property.city}`}
