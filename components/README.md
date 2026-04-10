@@ -147,3 +147,93 @@ The main landing page acting as the orchestrator for all components. It utilizes
     *   **Viewport Optimization:** Utilizes viewport={{ once: true, margin: "-100px" }} to ensure the animation only plays the first time the user sees it, and waits until the element is 100px inside the screen before triggering.
         
 *   **Z-Index & Overlap Strategy:** The Hero image uses a negative top margin (-mt-16 md:-mt-24) to slide up _underneath_ the Search Bar. The Search Bar is kept interactive by assigning it a higher z-index (z-30).
+
+Frontend Architecture Update: Area Search UI & Modal Integration (10/04/2026)
+================================================================
+
+1\. Overview
+------------
+
+This update enhances the AreaSearchPage by integrating a detailed Property Modal (PropertyDialog), a dedicated Map component (AreaSearchMap), and responsive mobile layouts. The page now utilizes framer-motion for smooth, application-like transitions and is structurally prepared for backend API integration.
+
+2\. Component Updates & Creation
+--------------------------------
+
+### HorizontalPropertyCard.js
+
+*   **Purpose:** Displays individual property summaries in the list view.
+    
+*   **Changes Made:** \* Added a blue-tinted background (bg-\[#0F58BF\]/\[0.08\]) to the entire card for brand consistency.
+    
+    *   **Crucial Update:** Added the onViewDetails prop.
+        
+    *   Attached onClick={onViewDetails} to the "View Details" button to trigger actions in the parent component.
+        
+
+### AreaSearchMap.js (NEW)
+
+*   **Purpose:** Isolates the map UI into its own reusable component for better maintainability.
+    
+*   **Features:** Contains the CSS-styled fake map background, neighborhood text overlays, absolute-positioned cluster markers, and zoom controls.
+    
+
+### page.js (AreaSearchPage)
+
+*   **Purpose:** The main container that manages state and layout for the search results.
+    
+*   **Changes Made:**
+    
+    *   Converted to a Client Component ('use client';) to handle React state.
+        
+    *   Imported and implemented PropertyDialog and AreaSearchMap.
+        
+    *   Added Framer Motion () for staggered list rendering, smooth header drop-downs, and a spring-animated mobile toggle button.
+        
+    *   Implemented responsive display logic: side-by-side on Desktop (lg), and a togglable List/Map view on Mobile.
+        
+
+### next.config.js
+
+*   **Purpose:** Global Next.js configuration.
+    
+*   **Changes Made:** Added i.pravatar.cc to images.remotePatterns to safely allow external placeholder images. _(Note: This will need to be updated with your actual production image host, e.g., AWS S3, Cloudinary)._
+    
+
+3\. State Management
+--------------------
+
+The AreaSearchPage relies on three key pieces of React state (useState):
+
+1.  isDialogOpen (Boolean): Controls whether the PropertyDialog modal is visible.
+    
+2.  selectedProperty (Object | null): Holds the specific data of the property card that was clicked, passing it into the modal.
+    
+3.  showMobileMap (Boolean): Controls the mobile UI toggle, switching the view between the Property List and the Map.
+    
+
+4\. Backend Integration Checklist (For Django API)
+--------------------------------------------------
+
+When the backend endpoints are ready, the following changes must be made in page.js:
+
+### A. Replace Dummy Data with API Fetch
+
+*   **Current State:** Uses a hardcoded dummyPropertyData object and maps over \[1, 2, 3, 4, 5\].
+    
+*   **Required Action:** 1. Create a state variable: const \[properties, setProperties\] = useState(\[\]).2. Write a useEffect hook to fetch() the array of properties from the Django backend.3. Map over properties instead of the hardcoded array.
+    
+
+### B. Map Database Columns to Frontend Props
+
+Ensure the keys returned by the Django JSON payload match the props expected by the components.
+
+*   _Example:_ If Django returns monthly\_rent, you must pass it as price={property.monthly\_rent} to the card/modal.
+    
+*   Pay special attention to PropertyDialog, which expects specific keys like bedrooms, bathrooms, and yearBuilt.
+    
+
+### C. Update the Click Handler Logic
+
+*   **Current State:** handleOpenDialog sets the state to the static dummy data.
+    
+*   **Required Action:** Update the function to accept the mapped property object dynamically.
