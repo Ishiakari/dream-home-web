@@ -9,10 +9,10 @@ export default function HorizontalPropertyCard({
     address = "123 High Street, Glasgow",
     rooms = 4,
     propertyType = "Flat",
-    status = "Available"
+    status = "Available",
+    onViewDetails // <--- 1. ADD THIS PROP HERE
 }) {
     return (
-        /* THE CHANGE: Replaced bg-white with bg-[#0F58BF]/[0.08] and kept the border for definition */
         <div className="group bg-[#0F58BF]/[0.08] border border-[#0F58BF]/20 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row h-auto sm:h-56 cursor-pointer">
         
         {/* LEFT SIDE: Image Container */}
@@ -54,7 +54,6 @@ export default function HorizontalPropertyCard({
 
             <div className="flex flex-col xl:flex-row justify-between xl:items-end gap-4 mt-auto">
                 <div className="flex items-center gap-4 text-slate-700 text-sm font-medium">
-                    {/* Property Type Badge (Solid background for contrast against the tinted card) */}
                     <div className="flex items-center gap-1 bg-white border border-[#0F58BF]/10 text-[#0F58BF] px-3 py-1 rounded-md shadow-sm">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -69,7 +68,11 @@ export default function HorizontalPropertyCard({
                     </div>
                 </div>
                 
-                <button className="bg-[#0F58BF] hover:bg-[#0d4ea8] text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 w-full xl:w-auto shadow-sm">
+                {/* 2. ADD THE ONCLICK HANDLER TO THE BUTTON HERE */}
+                <button 
+                    onClick={onViewDetails}
+                    className="bg-[#0F58BF] hover:bg-[#0d4ea8] text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 w-full xl:w-auto shadow-sm"
+                >
                     View Details
                 </button>
             </div>
