@@ -1,6 +1,10 @@
+'use client'; // 🌟 NEW: Added because we are now using useState
+
+import React, { useState } from 'react'; // 🌟 NEW: Imported useState
 import Link from "next/link";
 import { Building2, Home, KeyRound, Search } from "lucide-react";
 import { getUserRoleFlags } from "@/lib/auth/roles";
+import AddPropertyForm from "./AddPropertyForm"; // 🌟 NEW: Imported our form!
 
 function RolePanel({ icon: Icon, title, description, items, primaryAction }) {
   return (
@@ -24,20 +28,50 @@ function RolePanel({ icon: Icon, title, description, items, primaryAction }) {
       </ul>
 
       <div className="mt-4">
-        <Link
-          href={primaryAction.href}
-          className="inline-flex items-center rounded-lg bg-[#003580] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#002a66]"
-        >
-          {primaryAction.label}
-        </Link>
+        {/* 🌟 UPDATED: Checks if we should render a Button (for our form) or a Link (for normal pages) */}
+        {primaryAction.onClick ? (
+          <button
+            onClick={primaryAction.onClick}
+            className="inline-flex items-center rounded-lg bg-[#003580] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#002a66]"
+          >
+            {primaryAction.label}
+          </button>
+        ) : (
+          <Link
+            href={primaryAction.href}
+            className="inline-flex items-center rounded-lg bg-[#003580] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#002a66]"
+          >
+            {primaryAction.label}
+          </Link>
+        )}
       </div>
     </article>
   );
 }
 
 export default function ProfileRolePanels({ user }) {
+  // 🌟 NEW: State to track if the Owner is actively adding a property
+  const [isAddingProperty, setIsAddingProperty] = useState(false);
   const { isRenter, isOwner } = getUserRoleFlags(user?.role);
 
+  // 🌟 NEW: If they are an Owner AND clicked the button, show the form!
+  if (isOwner && isAddingProperty) {
+    return (
+      <div className="mt-4">
+        <button 
+          onClick={() => setIsAddingProperty(false)}
+          className="mb-6 flex items-center gap-2 text-[#003580] font-semibold hover:underline"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Back to Dashboard
+        </button>
+        
+        <AddPropertyForm />
+      </div>
+    );
+  }
+
+  // STANDARD DASHBOARD VIEW
   return (
     <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
       {isRenter ? (
@@ -64,7 +98,8 @@ export default function ProfileRolePanels({ user }) {
             "Track tenant requests and occupancy",
             "Review lease lifecycle status",
           ]}
-          primaryAction={{ href: "/list-property", label: "Manage Listings" }}
+          // 🌟 UPDATED: Changed from `href` to `onClick` to trigger our state!
+          primaryAction={{ onClick: () => setIsAddingProperty(true), label: "Add New Property" }}
         />
       ) : null}
 
