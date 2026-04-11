@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import LoginDialog from '@/components/ui/LoginDialog';
-import SignupDialog from '@/components/SignupDialog';
+import LoginDialog from '@/components/auth/LogInModal';
+import SignupDialog from '@/components/auth/SignUpModal';
 
 const NavBar = () => {
   const pathname = usePathname();
