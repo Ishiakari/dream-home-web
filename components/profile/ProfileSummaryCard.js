@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone, UserCircle } from "lucide-react";
+import { Mail, MapPin, Phone, UserCircle, Edit3 } from "lucide-react";
 import { getRoleTagTone, getUserRoleLabel } from "@/lib/auth/roles";
 
 function getInitials(name = "") {
@@ -14,7 +14,8 @@ function getInitials(name = "") {
     .join("");
 }
 
-export default function ProfileSummaryCard({ user }) {
+// 🌟 Added 'onEditClick' to the props
+export default function ProfileSummaryCard({ user, onEditClick }) {
   const displayName = user?.fullName || user?.firstName || "DreamHome User";
   const roleLabel = getUserRoleLabel(user?.role);
   const roleTone = getRoleTagTone(user?.role);
@@ -28,14 +29,27 @@ export default function ProfileSummaryCard({ user }) {
           </div>
 
           <div>
-            <h1 className="text-2xl font-extrabold text-[#003580] sm:text-3xl">{displayName}</h1>
+            <h1 className="text-2xl font-extrabold text-[#003580] sm:text-3xl">
+              {displayName}
+            </h1>
             <p className="mt-1 text-sm text-gray-600">Welcome to your DreamHome profile.</p>
           </div>
         </div>
 
-        <span className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold ${roleTone}`}>
-          {roleLabel}
-        </span>
+        {/* 🌟 ACTION SECTION: Role Tag + Edit Button */}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={onEditClick}
+            className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/50 px-4 py-1.5 text-xs font-bold text-[#003580] transition hover:bg-blue-100 active:scale-95"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+            Edit Profile
+          </button>
+
+          <span className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold ${roleTone}`}>
+            {roleLabel}
+          </span>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
