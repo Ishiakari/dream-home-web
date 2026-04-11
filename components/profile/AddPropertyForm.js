@@ -131,7 +131,7 @@ export default function AddPropertyForm() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Rent (£)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Rent (₱)</label>
                             <input type="number" step="0.01" name="monthly_rent" value={formData.monthly_rent} onChange={handleChange} required className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003580] outline-none transition text-gray-900 bg-white" />
                         </div>
 
