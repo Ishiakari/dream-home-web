@@ -181,13 +181,15 @@ export default function SignUpModal({
 
 					<div>
 						<FormInput
-							label="Address (optional)"
+							label="Address"
 							name="address"
 							value={form.address}
 							onChange={handleChange}
-							required={false}
 							autoComplete="street-address"
 						/>
+						{formErrors.address ? (
+							<p className="mt-1 text-xs text-red-600">{formErrors.address}</p>
+						) : null}
 					</div>
 
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
