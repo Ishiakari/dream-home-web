@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react"; // 🌟 Added useState
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileRolePanels from "@/components/profile/ProfileRolePanels";
 import ProfileSummaryCard from "@/components/profile/ProfileSummaryCard";
+import ProfileSettingsForm from "@/components/profile/ProfileSettingsForm"; // 🌟 Import your new form
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ProfilePage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuth();
+    
+    // 🌟 THE TOGGLE: This controls whether we see the dashboard or the edit form
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -51,8 +55,23 @@ export default function ProfilePage() {
     return (
         <section className="min-h-[calc(100vh-140px)] bg-linear-to-b from-[#f4f8ff] to-white px-4 py-8 sm:px-6 sm:py-10">
             <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-                <ProfileSummaryCard user={user} />
-                <ProfileRolePanels user={user} />
+                
+                {/* 🌟 LOGIC: If isEditing is true, show the Form. Otherwise, show the Dashboard. */}
+                {isEditing ? (
+                    <ProfileSettingsForm 
+                        user={user} 
+                        onCancel={() => setIsEditing(false)} 
+                    />
+                ) : (
+                    <>
+                        <ProfileSummaryCard 
+                            user={user} 
+                            onEditClick={() => setIsEditing(true)} 
+                        />
+                        <ProfileRolePanels user={user} />
+                    </>
+                )}
+                
             </div>
         </section>
     );
