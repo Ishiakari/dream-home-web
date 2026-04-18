@@ -120,14 +120,9 @@ export default function ProfileRolePanels({ user }) {
           return;
         }
 
-        const data = await apiClient.get("properties/", { token });
-        const list = normalizeList(data);
-
-        const filtered = ownerId
-          ? list.filter((prop) => matchesOwner(prop?.owner, ownerId))
-          : list;
-
-        setOwnerProperties(filtered);
+      const data = await apiClient.get("properties/my/", { token });
+      const list = normalizeList(data);
+      setOwnerProperties(list);
       } catch (err) {
         console.error("Owner properties load error:", err);
         setOwnerPropertiesError("Could not load your property listings.");

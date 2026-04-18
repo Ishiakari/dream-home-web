@@ -56,11 +56,9 @@ function normalizeList(data) {
         const token = await getValidAccessToken();
         if (!token) throw new Error("Missing access token.");
 
-        const data = await apiClient.get("properties/", { token });
+        const data = await apiClient.get("properties/my/", { token });
         const list = normalizeList(data);
-
-        const filtered = ownerId ? list.filter((p) => matchesOwner(p?.owner, ownerId)) : list;
-        setProperties(filtered);
+        setProperties(list);
         } catch (err) {
         setErrorMsg(toApiErrorMessage(err, "Could not load your listings."));
         setProperties([]);
