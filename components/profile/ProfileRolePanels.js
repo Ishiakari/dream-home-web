@@ -9,8 +9,6 @@ import AddPropertyForm from "./AddPropertyForm";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/hooks/useAuth";
 
-
-
 function RolePanel({ icon: Icon, title, description, items = [], primaryAction, children }) {
   return (
     <article className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -64,6 +62,27 @@ function normalizeList(data) {
   return [];
 }
 
+function matchesOwner(ownerField, ownerId) {
+  if (!ownerId) return true;
+
+  // owner might be "CO001" OR a URL OR {client_no:"CO001"} etc.
+  if (typeof ownerField === "string") {
+    const ownerStr = String(ownerField);
+    const idStr = String(ownerId);
+    return ownerStr === idStr || ownerStr.includes(idStr);
+  }
+
+  if (ownerField && typeof ownerField === "object") {
+    return (
+      String(ownerField.client_no || "") === String(ownerId) ||
+      String(ownerField.clientNo || "") === String(ownerId) ||
+      String(ownerField.id || "") === String(ownerId)
+    );
+  }
+
+  return false;
+}
+
 export default function ProfileRolePanels({ user }) {
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   const { isRenter, isOwner } = getUserRoleFlags(user?.role);
@@ -84,9 +103,7 @@ export default function ProfileRolePanels({ user }) {
       null
     );
   }, [user]);
-  useEffect(() => {
-  console.log("AUTH USER (ProfileRolePanels):", user);
-}, [user]);
+
   useEffect(() => {
     async function loadOwnerProperties() {
       if (!isOwner) return;
@@ -106,30 +123,8 @@ export default function ProfileRolePanels({ user }) {
         const data = await apiClient.get("properties/", { token });
         const list = normalizeList(data);
 
-        // ✅ DEBUG (temporary): tells us why old properties are not showing
-        console.log("DEBUG ownerId from user =", ownerId);
-        console.log("DEBUG total properties from API =", list.length);
-        console.log("DEBUG first 5 owner fields =", list.slice(0, 5).map((p) => p.owner));
-
         const filtered = ownerId
-          ? list.filter((prop) => {
-              const ownerField = prop?.owner;
-
-              // owner might be "CO001" OR a URL OR {client_no:"CO001"} etc.
-              if (typeof ownerField === "string") {
-                return ownerField === ownerId || ownerField.includes(ownerId);
-              }
-
-              if (ownerField && typeof ownerField === "object") {
-                return (
-                  ownerField.client_no === ownerId ||
-                  ownerField.clientNo === ownerId ||
-                  ownerField.id === ownerId
-                );
-              }
-
-              return false;
-            })
+          ? list.filter((prop) => matchesOwner(prop?.owner, ownerId))
           : list;
 
         setOwnerProperties(filtered);
@@ -154,7 +149,12 @@ export default function ProfileRolePanels({ user }) {
           className="mb-6 flex items-center gap-2 text-[#003580] font-semibold hover:underline"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Dashboard
         </button>
@@ -208,7 +208,8 @@ export default function ProfileRolePanels({ user }) {
               <p className="text-sm text-red-600">{ownerPropertiesError}</p>
             ) : ownerProperties.length === 0 ? (
               <p className="text-sm text-gray-600">
-                You don’t have any properties listed yet. Click <strong>Add New Property</strong> to create one.
+                You don’t have any properties listed yet. Click <strong>Add New Property</strong> to
+                create one.
               </p>
             ) : (
               <div className="space-y-3">
