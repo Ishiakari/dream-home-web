@@ -73,11 +73,6 @@ const NavBar = () => {
       items: ['Featured Flats', 'House Listings', 'Area Search']
     },
     {
-      title: 'Renters',
-      href: '/renters',
-      items: ['How to Apply', 'Schedule a Viewing', 'Lease FAQ']
-    },
-    {
       title: 'About',
       href: '/about',
       items: ['Our Branches', 'Contact Support']
