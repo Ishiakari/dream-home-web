@@ -241,7 +241,7 @@ export default function ProfileRolePanels({ user }) {
 
                       {rent !== undefined && rent !== null ? (
                         <p className="mt-2 text-xs text-gray-700">
-                          Monthly Rent: <span className="font-semibold">£{rent}</span>
+                          Monthly Rent: <span className="font-semibold">₱{rent}</span>
                         </p>
                       ) : null}
                     </div>
