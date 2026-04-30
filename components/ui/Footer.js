@@ -5,9 +5,9 @@ const FOOTER_CONFIG = {
         {
         title: 'Explore',
         links: [
-            { name: 'Featured Flats', href: '#' },
-            { name: 'House Listings', href: '#' },
-            { name: 'Branch Locations', href: '#' },
+            { name: 'Featured Flats', href: '/properties/featured-flats' },
+            { name: 'House Listings', href: '/properties/house-listings' },
+            { name: 'Branch Locations', href: '/about#branches-section' },
             { name: 'How it Works', href: '#' },
         ],
         },
