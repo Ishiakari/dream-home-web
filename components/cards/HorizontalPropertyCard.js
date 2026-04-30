@@ -34,7 +34,7 @@ export default function HorizontalPropertyCard({
             <div>
                 <div className="flex justify-between items-start mb-1">
                     <h3 className="text-2xl font-bold text-slate-900">
-                        £{price} <span className="text-sm font-medium text-slate-500">/ month</span>
+                        ₱{price} <span className="text-sm font-medium text-slate-500">/ month</span>
                     </h3>
                     <button className="text-slate-400 hover:text-red-500 transition">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

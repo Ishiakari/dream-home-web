@@ -1,111 +1,98 @@
 'use client'; // Required for framer-motion and useState
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion'; // NEW: Imported framer-motion
+import React, { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import SearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '@/components/cards/PropertyCard';
 import WhyChooseUs from '@/components/ui/WhyChooseUs';
 import AccordionItem from '@/components/ui/AccordionItem';
-import PropertyDialog from '@/components/cards/property/PropertyDialog'; // NEW: Imported the modal
+import PropertyDialog from '@/components/cards/property/PropertyDialog';
 
-// Extended the fallback data to include all fields the PropertyDialog expects
-const fallbackProperty = { 
-  id: 'dummy', 
-  title: 'Spacious 4-Bed House',
-  type: 'House', 
-  city: 'London', 
-  street: '123 Fake St', 
-  postcode: 'NW1 6XE', 
-  noOfRooms: 4, 
-  status: 'Available', 
-  monthlyRent: 850,
-  // Added fields for the Dialog
-  location: "London, UK",
-  price: "£850/mo",
-  tags: ["Available", "Family Home"],
-  images: ["/PlaceHolderPic.png"],
-  agent: {
-    name: "John Doe",
-    title: "Senior Lettings Agent",
-    avatarUrl: "https://i.pravatar.cc/150?img=11",
-  },
-  propertyType: "House",
-  yearBuilt: 2010,
-  bathrooms: 2,
-  bedrooms: 4,
-  address: "123 Fake St",
-  zip: "NW1 6XE",
-  area: "Camden",
-  description: "A beautiful and spacious family home located in a quiet residential neighborhood. Close to local schools, parks, and transport links.",
-  propertyId: "H001",
-  features: ["Garden", "Driveway", "Central Heating", "Double Glazing"]
-};
+import { usePublicProperties } from '@/hooks/usePublicProperties';
+import { toDialogProperty } from '@/lib/properties/toDialogProperty';
 
 const faqs = [
   {
     question: 'How do I book a viewing?',
-    answer: 'Click "View Details" on any property to see the full listing. You can then contact the branch directly to schedule a convenient viewing slot.'
+    answer:
+      'Click "View Details" on any property to see the full listing. You can then contact the branch directly to schedule a convenient viewing slot.',
   },
   {
     question: 'Are the listed prices inclusive of bills?',
-    answer: 'Monthly rent covers the property only. Check individual listings for details on council tax, utilities, and any service charges.'
+    answer:
+      'Monthly rent covers the property only. Check individual listings for details on council tax, utilities, and any service charges.',
   },
   {
     question: 'Can I filter by property type?',
-    answer: 'Yes — use the Property Type, Price Range, and Rooms filters in the header above to narrow results to your exact requirements.'
+    answer:
+      'Yes — use the Property Type, Price Range, and Rooms filters in the header above to narrow results to your exact requirements.',
   },
 ];
 
 export default function HouseListingPage() {
-  // NEW: State to control the modal
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
-  const handleOpenDialog = () => {
-    setSelectedProperty(fallbackProperty);
+  // ✅ NEW: load real properties from backend
+  const { properties, isLoading, errorMsg } = usePublicProperties();
+
+  // ✅ Filter only Houses (backend uses property_type)
+  const houseProperties = useMemo(() => {
+    return (properties || []).filter(
+      (p) => String(p?.property_type || '').toLowerCase() === 'house'
+    );
+  }, [properties]);
+
+  const handleOpenDialog = (propertyFromApi) => {
+    setSelectedProperty(toDialogProperty(propertyFromApi));
     setIsDialogOpen(true);
   };
 
   return (
     <div className="bg-white min-h-screen">
-
       {/* 1. STICKY SEARCH & FILTER HEADER (Slides down) */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         className="border-b border-slate-200 pb-4 pt-2 px-4 sm:px-8 bg-white sticky top-0 z-20 shadow-sm"
       >
         <div className="max-w-7xl mx-auto flex flex-col">
-
           <SearchBar />
 
           {/* Secondary Filter Row */}
           <div className="flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-4 px-2 text-slate-700">
             <div className="flex flex-wrap items-center gap-3">
-
               {/* Property Type */}
               <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
                 Property Type
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
 
               {/* Price Range */}
               <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
                 Price Range
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
 
               {/* Rooms */}
               <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
                 Rooms
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
 
               {/* Location */}
               <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
                 Location
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
             </div>
 
@@ -114,20 +101,22 @@ export default function HouseListingPage() {
               Sort by:
               <span className="text-[#e11d48] cursor-pointer flex items-center hover:underline">
                 Newest
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </span>
             </div>
           </div>
 
           <div className="text-sm font-medium text-slate-500 mt-4 px-2">
-            <span className="text-slate-900 font-bold">6 results</span> found across the UK
+            <span className="text-slate-900 font-bold">{houseProperties.length} results</span> found across the UK
           </div>
         </div>
       </motion.section>
 
       {/* 2. PROPERTY GRID (Staggered pop-in) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -136,22 +125,48 @@ export default function HouseListingPage() {
           House Listings
         </motion.h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((item, index) => (
-            <motion.div
-              key={item}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }} // Staggers the loading
-            >
-              {/* Passed the click handler to the property card! */}
-              <PropertyCard property={fallbackProperty} onViewDetails={handleOpenDialog} />
-            </motion.div>
-          ))}
-        </div>
+        {isLoading ? (
+          <p className="text-sm text-slate-600">Loading house listings...</p>
+        ) : errorMsg ? (
+          <p className="text-sm text-red-600">{errorMsg}</p>
+        ) : houseProperties.length === 0 ? (
+          <p className="text-sm text-slate-600">No house listings found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {houseProperties.map((prop, index) => {
+              const key = prop.property_no ?? prop.id ?? `house-${index}`;
+
+              // PropertyCard expects property.id etc. We'll adapt the payload lightly.
+              const cardProperty = {
+                id: prop.property_no ?? prop.id,
+                type: prop.property_type,
+                city: prop.city,
+                street: prop.street,
+                postcode: prop.postcode,
+                noOfRooms: prop.no_of_rooms,
+                status: prop.status,
+                monthlyRent: prop.monthly_rent,
+              };
+
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                >
+                  <PropertyCard
+                    property={cardProperty}
+                    onViewDetails={() => handleOpenDialog(prop)}
+                  />
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
-      {/* 3. WHY CHOOSE US (Fades in on scroll) */}
+      {/* 3. WHY CHOOSE US */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -161,11 +176,11 @@ export default function HouseListingPage() {
         <WhyChooseUs />
       </motion.div>
 
-      {/* 4. FAQ SECTION (Slides up on scroll) */}
-      <motion.section 
+      {/* 4. FAQ SECTION */}
+      <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
+        viewport={{ once: true, margin: '-50px' }}
         transition={{ duration: 0.6 }}
         className="max-w-4xl mx-auto px-4 sm:px-8 py-16 border-t border-slate-100 mt-4"
       >
@@ -174,22 +189,17 @@ export default function HouseListingPage() {
         </h2>
         <div className="space-y-4 max-w-3xl">
           {faqs.map((faq, index) => (
-            <AccordionItem
-              key={index}
-              title={faq.question}
-              content={faq.answer}
-            />
+            <AccordionItem key={index} title={faq.question} content={faq.answer} />
           ))}
         </div>
       </motion.section>
 
       {/* 5. MODAL COMPONENT */}
-      <PropertyDialog 
-        isOpen={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)} 
-        property={selectedProperty} 
+      <PropertyDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        property={selectedProperty}
       />
-
     </div>
   );
 }
