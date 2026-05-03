@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import ContactSection from '@/components/ui/ContactSection';
 import BranchesSection from '@/components/ui/BranchesSection';
-import { dummyBranches } from '@/data/dummyBranches';
+import { dummyBranches } from '@/lib/data/dummyBranches';
 
 const container = {
     hidden: {},
