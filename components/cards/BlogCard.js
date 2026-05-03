@@ -1,62 +1,83 @@
-import React from 'react';
 import Image from 'next/image';
 
-export default function HeroPropertyCard({
-    title = 'Comfortable Villa Green',
-    location = 'London, NW2',
-    price = '£1,200',
-    rooms = 4,
-    bathrooms = 2,
-    status = 'For Sale',
-    tag = 'Featured',
-    imageSrc = '/PlaceHolderPic.png',
-    onViewDetails, // ✅ NEW
-    }) {
+function Stars({ rating = 0 }) {
+    const full = Math.max(0, Math.min(5, Math.round(rating)));
+
     return (
-        <div
-        onClick={onViewDetails} // ✅ NEW: click anywhere opens details
-        role={onViewDetails ? 'button' : undefined}
-        tabIndex={onViewDetails ? 0 : undefined}
-        onKeyDown={(e) => {
-            if (!onViewDetails) return;
-            if (e.key === 'Enter' || e.key === ' ') onViewDetails();
-        }}
-        className="relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer w-full"
+        <div className="flex items-center gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+            <svg
+            key={i}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className={`h-4 w-4 ${i < full ? 'text-amber-400' : 'text-slate-200'}`}
+            aria-hidden="true"
+            >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.54-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.95-.69l1.07-3.292z" />
+            </svg>
+        ))}
+        </div>
+    );
+}
+
+export default function BlogCard({ blog, className = '' }) {
+    if (!blog) return null;
+
+    return (
+        <article
+        className={[
+            'w-full rounded-2xl border border-slate-200/70',
+            'bg-[#0F58BF]/[0.05] shadow-sm',
+            'px-7 py-7',
+            'min-h-[260px] flex flex-col', // ✅ equal-ish heights like Figma
+            className,
+        ].join(' ')}
         >
-        <div className="relative h-[380px] md:h-[480px] w-full">
-            <Image
-            src={imageSrc}
-            alt={title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
-            priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-        </div>
+        {/* Title + quote */}
+        <div className="flex items-start justify-between gap-6">
+            <h3 className="text-[15px] font-extrabold text-slate-900">{blog.title}</h3>
 
-        {/* Badges */}
-        <div className="absolute top-6 left-6 flex gap-2">
-            <span className="bg-[#003580] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
-            {status}
-            </span>
-            <span className="bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow">
-            ★ {tag}
+            {/* Quote mark */}
+            <span className="text-slate-200 text-5xl leading-none font-black select-none -mt-1">
+            “
             </span>
         </div>
 
-        {/* Bottom info */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-1">{title}</h2>
-            <p className="text-white/75 text-sm">
-                {location} · {rooms} rooms · {bathrooms} bath
-            </p>
+        {/* Content */}
+        <p className="mt-4 text-[13.5px] leading-6 text-slate-700">
+            “{blog.content}”
+        </p>
+
+        {/* Stars */}
+        <div className="mt-5">
+            <Stars rating={blog.rating} />
+        </div>
+
+        {/* Push author to bottom */}
+        <div className="mt-auto">
+            {/* Divider */}
+            <div className="mt-5 h-px w-full bg-slate-200/80" />
+
+            {/* Author */}
+            <div className="mt-5 flex items-center gap-3">
+            <div className="relative h-11 w-11 overflow-hidden rounded-full bg-slate-200 shrink-0">
+                <Image
+                src={blog.authorImage || '/PlaceHolderPic.png'}
+                alt={blog.authorName || 'Author'}
+                fill
+                sizes="44px"
+                className="object-cover"
+                />
             </div>
-            <div className="shrink-0 text-right">
-            <p className="text-white/60 text-xs">Monthly from</p>
-            <p className="text-2xl font-extrabold text-white">{price}</p>
+
+            <div className="min-w-0">
+                <p className="text-[13px] font-extrabold text-slate-900 truncate">
+                {blog.authorName}
+                </p>
+                <p className="text-[12px] text-slate-500 truncate">{blog.authorRole}</p>
+            </div>
             </div>
         </div>
-        </div>
+        </article>
     );
 }
