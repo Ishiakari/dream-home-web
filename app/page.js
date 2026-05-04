@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import PrimarySearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '../components/cards/PropertyCard';
@@ -16,7 +17,9 @@ import { usePublicProperties } from '@/hooks/usePublicProperties';
 import { toDialogProperty } from '@/lib/properties/toDialogProperty';
 
 export default function HomePage() {
-  // ✅ Load real properties
+  const router = useRouter();
+
+  // ✅ Load real properties (for the "Explore Destinations" section)
   const { properties, isLoading, errorMsg } = usePublicProperties();
 
   // Modal state
@@ -28,16 +31,34 @@ export default function HomePage() {
     setIsDialogOpen(true);
   };
 
-  // Show a small curated set on landing page (e.g. first 8)
+  // ✅ Submit-only search: navigate to area search with query params
+  const handleHeroSearch = (filters) => {
+    const params = new URLSearchParams();
+
+    const where = String(filters?.where || '').trim();
+    if (where) params.set('where', where);
+
+    if (filters?.minPrice !== null && filters?.minPrice !== undefined && !Number.isNaN(Number(filters.minPrice))) {
+      params.set('minPrice', String(filters.minPrice));
+    }
+    if (filters?.maxPrice !== null && filters?.maxPrice !== undefined && !Number.isNaN(Number(filters.maxPrice))) {
+      params.set('maxPrice', String(filters.maxPrice));
+    }
+    if (filters?.minRooms !== null && filters?.minRooms !== undefined && !Number.isNaN(Number(filters.minRooms))) {
+      params.set('minRooms', String(filters.minRooms));
+    }
+
+    const qs = params.toString();
+    router.push(qs ? `/properties/area-search?${qs}` : '/properties/area-search');
+  };
+
+  // Show a small curated set on landing page (first 8 available)
   const landingProperties = useMemo(() => {
-    // Optional: show only Available on landing page
     const available = (properties || []).filter(
       (p) => String(p?.status || '').toLowerCase() === 'available'
     );
-
     return available.slice(0, 8);
   }, [properties]);
-
 
   // FAQ Data (unchanged)
   const faqData = [
@@ -74,18 +95,19 @@ export default function HomePage() {
           Find your perfect <span className="text-[#E11553]">DreamHome</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-          Discover top-tier UK properties tailored to your lifestyle. Search by location, dates, and group size.
+          Discover top-tier UK properties tailored to your lifestyle. Search by location, price range, and rooms.
         </p>
       </motion.section>
 
-      {/* Search Bar Container */}
+      {/* Search Bar Container (SUBMIT ONLY ON LANDING PAGE) */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
         className="w-full max-w-4xl relative z-30"
       >
-        <PrimarySearchBar />
+        {/* ✅ Only pass onSearch — do NOT pass value/onChange on landing page */}
+        <PrimarySearchBar onSearch={handleHeroSearch} debounceMs={250} />
       </motion.div>
 
       {/* Intro Image */}
@@ -135,7 +157,6 @@ export default function HomePage() {
             {landingProperties.map((p, idx) => {
               const key = p.property_no ?? p.id ?? `home-${idx}`;
 
-              // Map backend -> PropertyCard expected shape (same mapping we used on house listings)
               const cardProperty = {
                 id: p.property_no ?? p.id,
                 type: p.property_type,
