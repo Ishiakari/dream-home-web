@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import HorizontalPropertyCard from '@/components/cards/HorizontalPropertyCard';
 import AccordionItem from '@/components/ui/AccordionItem';
@@ -10,14 +10,126 @@ import { motion } from 'framer-motion';
 
 import { toDialogProperty } from '@/lib/properties/toDialogProperty';
 import { usePublicProperties } from '@/hooks/usePublicProperties';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+function parseNumberOrEmpty(value) {
+  if (value === null || value === undefined) return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? n : '';
+}
+
+function buildFiltersFromSearchParams(searchParams) {
+  return {
+    where: searchParams.get('where') || '',
+    minPrice: parseNumberOrEmpty(searchParams.get('minPrice')),
+    maxPrice: parseNumberOrEmpty(searchParams.get('maxPrice')),
+    minRooms: parseNumberOrEmpty(searchParams.get('minRooms')),
+  };
+}
+
+function toQueryString(filters) {
+  const params = new URLSearchParams();
+
+  const where = String(filters?.where || '').trim();
+  if (where) params.set('where', where);
+
+  const minPrice = filters?.minPrice;
+  const maxPrice = filters?.maxPrice;
+  const minRooms = filters?.minRooms;
+
+  if (minPrice !== '' && minPrice !== null && minPrice !== undefined && !Number.isNaN(Number(minPrice))) {
+    params.set('minPrice', String(minPrice));
+  }
+  if (maxPrice !== '' && maxPrice !== null && maxPrice !== undefined && !Number.isNaN(Number(maxPrice))) {
+    params.set('maxPrice', String(maxPrice));
+  }
+  if (minRooms !== '' && minRooms !== null && minRooms !== undefined && !Number.isNaN(Number(minRooms))) {
+    params.set('minRooms', String(minRooms));
+  }
+
+  return params.toString();
+}
+
+function shallowEqualFilters(a, b) {
+  return (
+    (a?.where ?? '') === (b?.where ?? '') &&
+    String(a?.minPrice ?? '') === String(b?.minPrice ?? '') &&
+    String(a?.maxPrice ?? '') === String(b?.maxPrice ?? '') &&
+    String(a?.minRooms ?? '') === String(b?.minRooms ?? '')
+  );
+}
 
 export default function AreaSearchPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const qsString = searchParams.toString(); // ✅ stable dependency
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showMobileMap, setShowMobileMap] = useState(false);
 
-  // ✅ NEW: load real properties via reusable hook
+  // ✅ Public listings (Available-only)
   const { properties, isLoading, errorMsg } = usePublicProperties();
+
+  // ✅ Controlled filters for SearchBar
+  const [filters, setFilters] = useState({
+    where: '',
+    minPrice: '',
+    maxPrice: '',
+    minRooms: '',
+  });
+
+  // ✅ Sorting state (no "Newest")
+  // allowed: price_asc | price_desc | rooms_desc
+  const [sortBy, setSortBy] = useState('price_asc');
+
+  // Refs to prevent URL/state loops (especially landing -> area-search navigation)
+  const didHydrateRef = useRef(false);
+  const lastWrittenQsRef = useRef(null);
+  const didInitFromUrlRef = useRef(false);
+
+  // 0) Initialize from URL ONCE on first mount
+  useEffect(() => {
+    if (didInitFromUrlRef.current) return;
+
+    const next = buildFiltersFromSearchParams(searchParams);
+    setFilters(next);
+
+    didHydrateRef.current = true;
+    didInitFromUrlRef.current = true;
+
+    // baseline: treat current URL as already applied
+    lastWrittenQsRef.current = qsString;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 1) URL -> state (ONLY when URL changed NOT caused by our own typing)
+  useEffect(() => {
+    if (!didInitFromUrlRef.current) return;
+
+    // If this URL change matches what we last wrote, ignore it (it's from our replace)
+    if (lastWrittenQsRef.current === qsString) return;
+
+    const next = buildFiltersFromSearchParams(searchParams);
+    setFilters((prev) => (shallowEqualFilters(prev, next) ? prev : next));
+  }, [qsString, searchParams]);
+
+  // 2) state -> URL (live typing), loop-safe
+  useEffect(() => {
+    if (!didHydrateRef.current) return;
+    if (!didInitFromUrlRef.current) return;
+
+    const nextQs = toQueryString(filters);
+
+    // If already in sync, do nothing
+    if (nextQs === qsString) return;
+
+    lastWrittenQsRef.current = nextQs;
+
+    router.replace(nextQs ? `/properties/area-search?${nextQs}` : '/properties/area-search', {
+      scroll: false,
+    });
+  }, [filters, router, qsString]);
 
   const faqs = [
     {
@@ -32,17 +144,76 @@ export default function AreaSearchPage() {
     },
   ];
 
-  const resultsCount = properties.length;
-
   const handleOpenDialog = (propertyFromApi) => {
-    const dialogPayload = toDialogProperty(propertyFromApi);
-    setSelectedProperty(dialogPayload);
+    setSelectedProperty(toDialogProperty(propertyFromApi));
     setIsDialogOpen(true);
   };
 
+  // ✅ Filter list client-side
+  const filteredProperties = useMemo(() => {
+    const q = String(filters.where || '').trim().toLowerCase();
+
+    const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
+    const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
+    const minRooms = filters.minRooms === '' ? null : Number(filters.minRooms);
+
+    const hasMinPrice = Number.isFinite(minPrice);
+    const hasMaxPrice = Number.isFinite(maxPrice);
+    const hasMinRooms = Number.isFinite(minRooms);
+
+    return (properties || []).filter((p) => {
+      // Where text (partial match)
+      if (q) {
+        const hay = [p.title, p.street, p.area, p.city, p.postcode, p.property_type]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        if (!hay.includes(q)) return false;
+      }
+
+      // Price
+      const rent = Number(p.monthly_rent);
+      if (hasMinPrice && Number.isFinite(rent) && rent < minPrice) return false;
+      if (hasMaxPrice && Number.isFinite(rent) && rent > maxPrice) return false;
+
+      // Rooms (min)
+      const rooms = Number(p.no_of_rooms);
+      if (hasMinRooms && Number.isFinite(rooms) && rooms < minRooms) return false;
+
+      return true;
+    });
+  }, [properties, filters]);
+
+  // ✅ Sort the filtered list
+  const sortedProperties = useMemo(() => {
+    const list = [...filteredProperties];
+
+    const rentValue = (p) => {
+      const n = Number(p?.monthly_rent);
+      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    };
+
+    const roomsValue = (p) => {
+      const n = Number(p?.no_of_rooms);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    list.sort((a, b) => {
+      if (sortBy === 'price_asc') return rentValue(a) - rentValue(b);
+      if (sortBy === 'price_desc') return rentValue(b) - rentValue(a);
+      if (sortBy === 'rooms_desc') return roomsValue(b) - roomsValue(a);
+      return 0;
+    });
+
+    return list;
+  }, [filteredProperties, sortBy]);
+
+  const resultsCount = sortedProperties.length;
+
   return (
     <div className="bg-white min-h-screen relative pb-20 lg:pb-0">
-      {/* 1. HEADER (Slides down from top) */}
+      {/* HEADER */}
       <motion.section
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -50,40 +221,22 @@ export default function AreaSearchPage() {
         className="border-b border-slate-200 pb-4 pt-2 px-4 sm:px-8 bg-white sticky top-0 z-20 shadow-sm"
       >
         <div className="max-w-7xl mx-auto flex flex-col">
-          <SearchBar />
+          {/* live typing on area-search */}
+          <SearchBar value={filters} onChange={setFilters} onSearch={setFilters} debounceMs={250} />
 
-          <div className="flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-4 px-2 text-slate-700">
-            <div className="flex flex-wrap items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Property Type
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Price Range
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Rooms
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-
+          {/* ✅ SORT ONLY (pill row removed) */}
+          <div className="flex items-center justify-end w-full mt-6 px-2 text-slate-700">
             <div className="text-sm font-semibold flex items-center gap-2">
               Sort by:
-              <span className="text-[#e11d48] cursor-pointer flex items-center hover:underline">
-                Newest
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-[#e11d48] bg-transparent font-semibold cursor-pointer outline-none"
+              >
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rooms_desc">Rooms: Most first</option>
+              </select>
             </div>
           </div>
 
@@ -93,10 +246,10 @@ export default function AreaSearchPage() {
         </div>
       </motion.section>
 
-      {/* 2. MAIN CONTENT */}
+      {/* MAIN */}
       <section className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* LEFT COLUMN: Property List */}
+          {/* LEFT: list */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -109,11 +262,11 @@ export default function AreaSearchPage() {
               <p className="text-sm text-slate-600">Loading properties...</p>
             ) : errorMsg ? (
               <p className="text-sm text-red-600">{errorMsg}</p>
-            ) : properties.length === 0 ? (
+            ) : sortedProperties.length === 0 ? (
               <p className="text-sm text-slate-600">No properties found.</p>
             ) : (
               <div className="flex flex-col gap-6">
-                {properties.map((prop, index) => {
+                {sortedProperties.map((prop, index) => {
                   const id = prop.property_no ?? prop.id ?? `row-${index}`;
                   const title = prop.title || `${prop.property_type ?? 'Property'} in ${prop.city ?? ''}`.trim();
                   const address = [prop.street, prop.city].filter(Boolean).join(', ');
@@ -146,7 +299,7 @@ export default function AreaSearchPage() {
             )}
           </motion.div>
 
-          {/* RIGHT COLUMN: The Map */}
+          {/* RIGHT: map */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -158,7 +311,7 @@ export default function AreaSearchPage() {
         </div>
       </section>
 
-      {/* 3. FAQ SECTION */}
+      {/* FAQ */}
       <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -177,7 +330,7 @@ export default function AreaSearchPage() {
         </div>
       </motion.section>
 
-      {/* MOBILE FLOATING TOGGLE BUTTON */}
+      {/* MOBILE TOGGLE */}
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
@@ -206,7 +359,11 @@ export default function AreaSearchPage() {
         </button>
       </motion.div>
 
-      <PropertyDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} property={selectedProperty} />
+      <PropertyDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        property={selectedProperty}
+      />
     </div>
   );
 }

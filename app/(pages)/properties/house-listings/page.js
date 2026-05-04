@@ -1,6 +1,6 @@
 'use client'; // Required for framer-motion and useState
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import SearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '@/components/cards/PropertyCard';
@@ -10,6 +10,7 @@ import PropertyDialog from '@/components/cards/property/PropertyDialog';
 
 import { usePublicProperties } from '@/hooks/usePublicProperties';
 import { toDialogProperty } from '@/lib/properties/toDialogProperty';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const faqs = [
   {
@@ -25,32 +26,200 @@ const faqs = [
   {
     question: 'Can I filter by property type?',
     answer:
-      'Yes — use the Property Type, Price Range, and Rooms filters in the header above to narrow results to your exact requirements.',
+      'Yes — use the search bar filters in the header above to narrow results to your exact requirements.',
   },
 ];
 
+function parseNumberOrEmpty(value) {
+  if (value === null || value === undefined) return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? n : '';
+}
+
+function buildFiltersFromSearchParams(searchParams) {
+  return {
+    where: searchParams.get('where') || '',
+    minPrice: parseNumberOrEmpty(searchParams.get('minPrice')),
+    maxPrice: parseNumberOrEmpty(searchParams.get('maxPrice')),
+    minRooms: parseNumberOrEmpty(searchParams.get('minRooms')),
+  };
+}
+
+function toQueryString(filters) {
+  const params = new URLSearchParams();
+
+  const where = String(filters?.where || '').trim();
+  if (where) params.set('where', where);
+
+  const minPrice = filters?.minPrice;
+  const maxPrice = filters?.maxPrice;
+  const minRooms = filters?.minRooms;
+
+  if (minPrice !== '' && minPrice !== null && minPrice !== undefined && !Number.isNaN(Number(minPrice))) {
+    params.set('minPrice', String(minPrice));
+  }
+  if (maxPrice !== '' && maxPrice !== null && maxPrice !== undefined && !Number.isNaN(Number(maxPrice))) {
+    params.set('maxPrice', String(maxPrice));
+  }
+  if (minRooms !== '' && minRooms !== null && minRooms !== undefined && !Number.isNaN(Number(minRooms))) {
+    params.set('minRooms', String(minRooms));
+  }
+
+  return params.toString();
+}
+
+function shallowEqualFilters(a, b) {
+  return (
+    (a?.where ?? '') === (b?.where ?? '') &&
+    String(a?.minPrice ?? '') === String(b?.minPrice ?? '') &&
+    String(a?.maxPrice ?? '') === String(b?.maxPrice ?? '') &&
+    String(a?.minRooms ?? '') === String(b?.minRooms ?? '')
+  );
+}
+
 export default function HouseListingPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const qsString = searchParams.toString(); // ✅ stable dependency
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
-  // ✅ NEW: load real properties from backend
+  // ✅ load real properties from backend (available-only from hook)
   const { properties, isLoading, errorMsg } = usePublicProperties();
 
-  // ✅ Filter only Houses (backend uses property_type)
-  const houseProperties = useMemo(() => {
-    return (properties || []).filter(
-      (p) => String(p?.property_type || '').toLowerCase() === 'house'
+  // ✅ Controlled filters for SearchBar (URL synced)
+  const [filters, setFilters] = useState({
+    where: '',
+    minPrice: '',
+    maxPrice: '',
+    minRooms: '',
+  });
+
+  // ✅ Sorting state (no "Newest")
+  // allowed: price_asc | price_desc | rooms_desc
+  const [sortBy, setSortBy] = useState('price_asc');
+
+  // Refs to prevent URL/state loops (landing -> page navigation etc.)
+  const didHydrateRef = useRef(false);
+  const lastWrittenQsRef = useRef(null);
+  const didInitFromUrlRef = useRef(false);
+
+  // 0) Initialize from URL ONCE on first mount
+  useEffect(() => {
+    if (didInitFromUrlRef.current) return;
+
+    const next = buildFiltersFromSearchParams(searchParams);
+    setFilters(next);
+
+    didHydrateRef.current = true;
+    didInitFromUrlRef.current = true;
+
+    lastWrittenQsRef.current = qsString;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 1) URL -> state (ONLY when URL changed NOT caused by our own typing)
+  useEffect(() => {
+    if (!didInitFromUrlRef.current) return;
+    if (lastWrittenQsRef.current === qsString) return;
+
+    const next = buildFiltersFromSearchParams(searchParams);
+    setFilters((prev) => (shallowEqualFilters(prev, next) ? prev : next));
+  }, [qsString, searchParams]);
+
+  // 2) state -> URL (live typing), loop-safe
+  useEffect(() => {
+    if (!didHydrateRef.current) return;
+    if (!didInitFromUrlRef.current) return;
+
+    const nextQs = toQueryString(filters);
+    if (nextQs === qsString) return;
+
+    lastWrittenQsRef.current = nextQs;
+
+    router.replace(
+      nextQs ? `/properties/house-listings?${nextQs}` : '/properties/house-listings',
+      { scroll: false }
     );
-  }, [properties]);
+  }, [filters, router, qsString]);
 
   const handleOpenDialog = (propertyFromApi) => {
     setSelectedProperty(toDialogProperty(propertyFromApi));
     setIsDialogOpen(true);
   };
 
+  // ✅ Step 1: filter to houses only
+  const houseOnly = useMemo(() => {
+    return (properties || []).filter((p) => String(p?.property_type || '').toLowerCase() === 'house');
+  }, [properties]);
+
+  // ✅ Step 2: apply search filters (where/price/rooms)
+  const filteredHouses = useMemo(() => {
+    const q = String(filters.where || '').trim().toLowerCase();
+
+    const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
+    const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
+    const minRooms = filters.minRooms === '' ? null : Number(filters.minRooms);
+
+    const hasMinPrice = Number.isFinite(minPrice);
+    const hasMaxPrice = Number.isFinite(maxPrice);
+    const hasMinRooms = Number.isFinite(minRooms);
+
+    return (houseOnly || []).filter((p) => {
+      // where text
+      if (q) {
+        const hay = [p.title, p.street, p.area, p.city, p.postcode, p.property_type]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        if (!hay.includes(q)) return false;
+      }
+
+      // price
+      const rent = Number(p.monthly_rent);
+      if (hasMinPrice && Number.isFinite(rent) && rent < minPrice) return false;
+      if (hasMaxPrice && Number.isFinite(rent) && rent > maxPrice) return false;
+
+      // rooms
+      const rooms = Number(p.no_of_rooms);
+      if (hasMinRooms && Number.isFinite(rooms) && rooms < minRooms) return false;
+
+      return true;
+    });
+  }, [houseOnly, filters]);
+
+  // ✅ Step 3: sort
+  const sortedHouses = useMemo(() => {
+    const list = [...filteredHouses];
+
+    const rentValue = (p) => {
+      const n = Number(p?.monthly_rent);
+      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    };
+
+    const roomsValue = (p) => {
+      const n = Number(p?.no_of_rooms);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    list.sort((a, b) => {
+      if (sortBy === 'price_asc') return rentValue(a) - rentValue(b);
+      if (sortBy === 'price_desc') return rentValue(b) - rentValue(a);
+      if (sortBy === 'rooms_desc') return roomsValue(b) - roomsValue(a);
+      return 0;
+    });
+
+    return list;
+  }, [filteredHouses, sortBy]);
+
+  // ✅ Results count should reflect filtered + sorted list
+  const resultsCount = sortedHouses.length;
+
   return (
     <div className="bg-white min-h-screen">
-      {/* 1. STICKY SEARCH & FILTER HEADER (Slides down) */}
+      {/* 1. STICKY SEARCH HEADER */}
       <motion.section
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -58,63 +227,32 @@ export default function HouseListingPage() {
         className="border-b border-slate-200 pb-4 pt-2 px-4 sm:px-8 bg-white sticky top-0 z-20 shadow-sm"
       >
         <div className="max-w-7xl mx-auto flex flex-col">
-          <SearchBar />
+          {/* ✅ live typing like area-search */}
+          <SearchBar value={filters} onChange={setFilters} onSearch={setFilters} debounceMs={250} />
 
-          {/* Secondary Filter Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-4 px-2 text-slate-700">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Property Type */}
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Property Type
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Price Range */}
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Price Range
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Rooms */}
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Rooms
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Location */}
-              <button className="flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-50 transition bg-white">
-                Location
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Sort */}
+          {/* ✅ sort only (pill row removed) */}
+          <div className="flex items-center justify-end w-full mt-6 px-2 text-slate-700">
             <div className="text-sm font-semibold flex items-center gap-2">
               Sort by:
-              <span className="text-[#e11d48] cursor-pointer flex items-center hover:underline">
-                Newest
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-[#e11d48] bg-transparent font-semibold cursor-pointer outline-none"
+              >
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rooms_desc">Rooms: Most first</option>
+              </select>
             </div>
           </div>
 
           <div className="text-sm font-medium text-slate-500 mt-4 px-2">
-            <span className="text-slate-900 font-bold">{houseProperties.length} results</span> found across the UK
+            <span className="text-slate-900 font-bold">{resultsCount} results</span> found in your area
           </div>
         </div>
       </motion.section>
 
-      {/* 2. PROPERTY GRID (Staggered pop-in) */}
+      {/* 2. PROPERTY GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
         <motion.h1
           initial={{ opacity: 0, x: -20 }}
@@ -129,14 +267,13 @@ export default function HouseListingPage() {
           <p className="text-sm text-slate-600">Loading house listings...</p>
         ) : errorMsg ? (
           <p className="text-sm text-red-600">{errorMsg}</p>
-        ) : houseProperties.length === 0 ? (
+        ) : sortedHouses.length === 0 ? (
           <p className="text-sm text-slate-600">No house listings found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {houseProperties.map((prop, index) => {
+            {sortedHouses.map((prop, index) => {
               const key = prop.property_no ?? prop.id ?? `house-${index}`;
 
-              // PropertyCard expects property.id etc. We'll adapt the payload lightly.
               const cardProperty = {
                 id: prop.property_no ?? prop.id,
                 type: prop.property_type,
@@ -155,10 +292,7 @@ export default function HouseListingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
                 >
-                  <PropertyCard
-                    property={cardProperty}
-                    onViewDetails={() => handleOpenDialog(prop)}
-                  />
+                  <PropertyCard property={cardProperty} onViewDetails={() => handleOpenDialog(prop)} />
                 </motion.div>
               );
             })}
@@ -195,11 +329,7 @@ export default function HouseListingPage() {
       </motion.section>
 
       {/* 5. MODAL COMPONENT */}
-      <PropertyDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        property={selectedProperty}
-      />
+      <PropertyDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} property={selectedProperty} />
     </div>
   );
 }
