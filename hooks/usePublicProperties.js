@@ -10,10 +10,14 @@ function normalizeList(data) {
     return [];
     }
 
+    function isAvailable(property) {
+    return String(property?.status || "").toLowerCase() === "available";
+    }
+
     /**
      * usePublicProperties
      * Loads public property listings from GET /api/properties/
-     * (your backend is now public for GET).
+     * Public browsing should only show AVAILABLE listings.
      */
     export function usePublicProperties() {
     const [properties, setProperties] = useState([]);
@@ -27,7 +31,11 @@ function normalizeList(data) {
         try {
         const data = await apiClient.get("properties/");
         const list = normalizeList(data);
-        setProperties(list);
+
+        // ✅ Only show listings that should be public
+        const publicList = list.filter(isAvailable);
+
+        setProperties(publicList);
         } catch (err) {
         console.error("Public properties fetch error:", err);
         setProperties([]);
