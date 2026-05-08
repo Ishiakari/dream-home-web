@@ -70,12 +70,19 @@ const NavBar = () => {
     {
       title: 'Properties',
       href: '/properties',
-      items: ['Featured Flats', 'House Listings', 'Area Search']
+      items: [
+        { label: 'Featured Flats', href: '/properties/featured-flats' },
+        { label: 'House Listings', href: '/properties/house-listings' },
+        { label: 'Area Search', href: '/properties/area-search' }
+      ]
     },
     {
       title: 'About',
       href: '/about',
-      items: ['Our Branches', 'Contact Support']
+      items: [
+        { label: 'Our Branches', href: '/about#branches-section' },
+        { label: 'Contact Support', href: '/about#contact-section' }
+      ]
     }
   ];
 
@@ -118,11 +125,11 @@ const NavBar = () => {
                 <div className={`absolute top-full left-0 w-64 bg-white text-[#003580] rounded-xl shadow-2xl py-3 border border-gray-100 transition-all duration-200 z-60 ${activeDropdown === menu.title ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                   {menu.items.map((item) => (
                     <Link
-                      key={item}
-                      href={`${menu.href}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                      key={item.label}
+                      href={item.href}
                       className="block px-4 py-2.5 text-sm font-medium hover:bg-blue-50 transition-colors border-l-4 border-transparent hover:border-[#003580]"
                     >
-                      {item}
+                      {item.label}
                     </Link>
                   ))}
                 </div>
@@ -228,12 +235,12 @@ const NavBar = () => {
                 <div className="flex flex-col gap-3 pl-4 border-l-2 border-blue-800/50">
                   {menu.items.map(item => (
                     <Link 
-                      key={item} 
-                      href={`${menu.href}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                      key={item.label} 
+                      href={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="text-sm text-white/80 hover:text-white transition"
                     >
-                      {item}
+                      {item.label}
                     </Link>
                   ))}
                 </div>
