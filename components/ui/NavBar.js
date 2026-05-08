@@ -132,7 +132,7 @@ const NavBar = () => {
 
           {/* RIGHT SECTION: ACTIONS & MOBILE MENU BUTTON */}
           <div className="flex items-center gap-4 shrink-0">
-            <Link href="/list-property" className="hidden xl:block text-sm font-medium hover:text-blue-200 transition">
+            <Link href="/profile" className="hidden xl:block text-sm font-medium hover:text-blue-200 transition">
               List your property
             </Link>
 
