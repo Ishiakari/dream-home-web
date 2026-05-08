@@ -13,7 +13,10 @@ export default function HorizontalPropertyCard({
     onViewDetails // <--- 1. ADD THIS PROP HERE
 }) {
     return (
-        <div className="group bg-[#0F58BF]/[0.08] border border-[#0F58BF]/20 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row h-auto sm:h-56 cursor-pointer">
+        <div 
+            onClick={onViewDetails}
+            className="group bg-[#0F58BF]/[0.08] border border-[#0F58BF]/20 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row h-auto sm:h-56 cursor-pointer"
+        >
         
         {/* LEFT SIDE: Image Container */}
         <div className="relative w-full sm:w-2/5 h-48 sm:h-full overflow-hidden shrink-0 bg-slate-200">
@@ -70,7 +73,10 @@ export default function HorizontalPropertyCard({
                 
                 {/* 2. ADD THE ONCLICK HANDLER TO THE BUTTON HERE */}
                 <button 
-                    onClick={onViewDetails}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onViewDetails) onViewDetails();
+                    }}
                     className="bg-[#0F58BF] hover:bg-[#0d4ea8] text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 w-full xl:w-auto shadow-sm"
                 >
                     View Details

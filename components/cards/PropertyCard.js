@@ -9,9 +9,14 @@ const STATUS_BADGE = {
 };
 
 export default function PropertyCard({ property, onViewDetails }) {
+    const Wrapper = onViewDetails ? 'div' : Link;
+    const wrapperProps = onViewDetails 
+        ? { onClick: onViewDetails, className: "block transition-transform hover:scale-105 cursor-pointer" }
+        : { href: `/properties/house-listings/${property.id}`, className: "block transition-transform hover:scale-105 cursor-pointer" };
+
     return (
-        <Link href={`/properties/house-listings/${property.id}`} className="block transition-transform hover:scale-105">
-            <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 cursor-pointer">
+        <Wrapper {...wrapperProps}>
+            <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100">
                 {/* Image Section */}
                 <div className="relative h-56 w-full group overflow-hidden rounded-t-3xl">
                     {/* Status badge */}
@@ -115,6 +120,6 @@ export default function PropertyCard({ property, onViewDetails }) {
 
                 </div>
             </div>
-        </Link>
+        </Wrapper>
     );
 }
