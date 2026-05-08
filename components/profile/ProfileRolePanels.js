@@ -172,7 +172,7 @@ export default function ProfileRolePanels({ user }) {
             "Track active viewing requests",
             "Monitor application and lease progress",
           ]}
-          primaryAction={{ href: "/properties", label: "Browse Properties" }}
+          primaryAction={{ href: "/properties/house-listings", label: "Browse Properties" }}
         />
       ) : null}
 

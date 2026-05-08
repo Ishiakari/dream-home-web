@@ -95,7 +95,7 @@ export default function HomePage() {
           Find your perfect <span className="text-[#E11553]">DreamHome</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-          Discover top-tier UK properties tailored to your lifestyle. Search by location, price range, and rooms.
+          Discover top-tier PH properties tailored to your lifestyle. Search by location, price range, and rooms.
         </p>
       </motion.section>
 
