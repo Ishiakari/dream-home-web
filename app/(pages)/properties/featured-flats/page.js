@@ -44,11 +44,18 @@ export default function FeaturedFlatsPage() {
   // ✅ Load real properties
   const { properties, isLoading, errorMsg } = usePublicProperties();
 
-  // ✅ Filter only flats
+  // ✅ Filter only flats and sort by highest price (premium listings first)
   const flatProperties = useMemo(() => {
-    return (properties || []).filter(
+    const flats = (properties || []).filter(
       (p) => String(p?.property_type || '').toLowerCase() === 'flat'
     );
+    
+    // Sort descending by monthly rent
+    return flats.sort((a, b) => {
+      const priceA = parseFloat(a.monthly_rent) || 0;
+      const priceB = parseFloat(b.monthly_rent) || 0;
+      return priceB - priceA;
+    });
   }, [properties]);
 
   // ✅ pick a hero property (first flat)
