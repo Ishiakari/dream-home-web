@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import SearchBar from '@/components/ui/SearchBar';
 import HorizontalPropertyCard from '@/components/cards/HorizontalPropertyCard';
 import AccordionItem from '@/components/ui/AccordionItem';
@@ -10,206 +10,48 @@ import { motion } from 'framer-motion';
 
 import { toDialogProperty } from '@/lib/properties/toDialogProperty';
 import { usePublicProperties } from '@/hooks/usePublicProperties';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
-function parseNumberOrEmpty(value) {
-  if (value === null || value === undefined) return '';
-  const n = Number(value);
-  return Number.isFinite(n) ? n : '';
-}
-
-function buildFiltersFromSearchParams(searchParams) {
-  return {
-    where: searchParams.get('where') || '',
-    minPrice: parseNumberOrEmpty(searchParams.get('minPrice')),
-    maxPrice: parseNumberOrEmpty(searchParams.get('maxPrice')),
-    minRooms: parseNumberOrEmpty(searchParams.get('minRooms')),
-  };
-}
-
-function toQueryString(filters) {
-  const params = new URLSearchParams();
-
-  const where = String(filters?.where || '').trim();
-  if (where) params.set('where', where);
-
-  const minPrice = filters?.minPrice;
-  const maxPrice = filters?.maxPrice;
-  const minRooms = filters?.minRooms;
-
-  if (minPrice !== '' && minPrice !== null && minPrice !== undefined && !Number.isNaN(Number(minPrice))) {
-    params.set('minPrice', String(minPrice));
-  }
-  if (maxPrice !== '' && maxPrice !== null && maxPrice !== undefined && !Number.isNaN(Number(maxPrice))) {
-    params.set('maxPrice', String(maxPrice));
-  }
-  if (minRooms !== '' && minRooms !== null && minRooms !== undefined && !Number.isNaN(Number(minRooms))) {
-    params.set('minRooms', String(minRooms));
-  }
-
-  return params.toString();
-}
-
-function shallowEqualFilters(a, b) {
-  return (
-    (a?.where ?? '') === (b?.where ?? '') &&
-    String(a?.minPrice ?? '') === String(b?.minPrice ?? '') &&
-    String(a?.maxPrice ?? '') === String(b?.maxPrice ?? '') &&
-    String(a?.minRooms ?? '') === String(b?.minRooms ?? '')
-  );
-}
+const faqs = [
+  {
+    question: 'How do I schedule a viewing?',
+    answer:
+      "Click 'View Details' on any property to see the full description and contact the branch directly to book a slot.",
+  },
+  {
+    question: 'Are these prices inclusive of bills?',
+    answer:
+      'Monthly rent typically covers the property only. Check the details page for specific information regarding council tax and utilities.',
+  },
+];
 
 export default function AreaSearchPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const qsString = searchParams.toString(); // ✅ stable dependency
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showMobileMap, setShowMobileMap] = useState(false);
 
-  // ✅ Public listings (Available-only)
+  // ✅ Data fetching
   const { properties, isLoading, errorMsg } = usePublicProperties();
 
-  // ✅ Controlled filters for SearchBar
-  const [filters, setFilters] = useState({
-    where: '',
-    minPrice: '',
-    maxPrice: '',
-    minRooms: '',
+  // ✅ Shared filter/sort/URL-sync hook (replaces ~80 lines of duplicated code)
+  const {
+    filters,
+    setFilters,
+    sortBy,
+    setSortBy,
+    sortedProperties,
+    resultsCount,
+  } = usePropertyFilters({
+    properties,
+    isLoading,
+    errorMsg,
+    basePath: '/properties/area-search',
   });
-
-  // ✅ Sorting state (no "Newest")
-  // allowed: price_asc | price_desc | rooms_desc
-  const [sortBy, setSortBy] = useState('price_asc');
-
-  // Refs to prevent URL/state loops (especially landing -> area-search navigation)
-  const didHydrateRef = useRef(false);
-  const lastWrittenQsRef = useRef(null);
-  const didInitFromUrlRef = useRef(false);
-
-  // 0) Initialize from URL ONCE on first mount
-  useEffect(() => {
-    if (didInitFromUrlRef.current) return;
-
-    const next = buildFiltersFromSearchParams(searchParams);
-    setFilters(next);
-
-    didHydrateRef.current = true;
-    didInitFromUrlRef.current = true;
-
-    // baseline: treat current URL as already applied
-    lastWrittenQsRef.current = qsString;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 1) URL -> state (ONLY when URL changed NOT caused by our own typing)
-  useEffect(() => {
-    if (!didInitFromUrlRef.current) return;
-
-    // If this URL change matches what we last wrote, ignore it (it's from our replace)
-    if (lastWrittenQsRef.current === qsString) return;
-
-    const next = buildFiltersFromSearchParams(searchParams);
-    setFilters((prev) => (shallowEqualFilters(prev, next) ? prev : next));
-  }, [qsString, searchParams]);
-
-  // 2) state -> URL (live typing), loop-safe
-  useEffect(() => {
-    if (!didHydrateRef.current) return;
-    if (!didInitFromUrlRef.current) return;
-
-    const nextQs = toQueryString(filters);
-
-    // If already in sync, do nothing
-    if (nextQs === qsString) return;
-
-    lastWrittenQsRef.current = nextQs;
-
-    router.replace(nextQs ? `/properties/area-search?${nextQs}` : '/properties/area-search', {
-      scroll: false,
-    });
-  }, [filters, router, qsString]);
-
-  const faqs = [
-    {
-      question: 'How do I schedule a viewing?',
-      answer:
-        "Click 'View Details' on any property to see the full description and contact the branch directly to book a slot.",
-    },
-    {
-      question: 'Are these prices inclusive of bills?',
-      answer:
-        'Monthly rent typically covers the property only. Check the details page for specific information regarding council tax and utilities.',
-    },
-  ];
 
   const handleOpenDialog = (propertyFromApi) => {
     setSelectedProperty(toDialogProperty(propertyFromApi));
     setIsDialogOpen(true);
   };
-
-  // ✅ Filter list client-side
-  const filteredProperties = useMemo(() => {
-    const q = String(filters.where || '').trim().toLowerCase();
-
-    const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
-    const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
-    const minRooms = filters.minRooms === '' ? null : Number(filters.minRooms);
-
-    const hasMinPrice = Number.isFinite(minPrice);
-    const hasMaxPrice = Number.isFinite(maxPrice);
-    const hasMinRooms = Number.isFinite(minRooms);
-
-    return (properties || []).filter((p) => {
-      // Where text (partial match)
-      if (q) {
-        const hay = [p.title, p.street, p.area, p.city, p.postcode, p.property_type]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        if (!hay.includes(q)) return false;
-      }
-
-      // Price
-      const rent = Number(p.monthly_rent);
-      if (hasMinPrice && Number.isFinite(rent) && rent < minPrice) return false;
-      if (hasMaxPrice && Number.isFinite(rent) && rent > maxPrice) return false;
-
-      // Rooms (min)
-      const rooms = Number(p.no_of_rooms);
-      if (hasMinRooms && Number.isFinite(rooms) && rooms < minRooms) return false;
-
-      return true;
-    });
-  }, [properties, filters]);
-
-  // ✅ Sort the filtered list
-  const sortedProperties = useMemo(() => {
-    const list = [...filteredProperties];
-
-    const rentValue = (p) => {
-      const n = Number(p?.monthly_rent);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    const roomsValue = (p) => {
-      const n = Number(p?.no_of_rooms);
-      return Number.isFinite(n) ? n : 0;
-    };
-
-    list.sort((a, b) => {
-      if (sortBy === 'price_asc') return rentValue(a) - rentValue(b);
-      if (sortBy === 'price_desc') return rentValue(b) - rentValue(a);
-      if (sortBy === 'rooms_desc') return roomsValue(b) - roomsValue(a);
-      return 0;
-    });
-
-    return list;
-  }, [filteredProperties, sortBy]);
-
-  const resultsCount = sortedProperties.length;
 
   return (
     <div className="bg-white min-h-screen relative pb-20 lg:pb-0">

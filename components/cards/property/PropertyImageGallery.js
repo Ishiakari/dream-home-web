@@ -54,7 +54,7 @@ export default function PropertyImageGallery({ images = [], alt = "Property imag
                 idx === activeIndex ? "border-blue-600" : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >
-              <Image src={src} alt={`Thumbnail ${idx + 1}`} fill className="object-cover" />
+              <Image src={src} alt={`Thumbnail ${idx + 1}`} fill sizes="96px" className="object-cover" />
             </button>
           ))}
         </div>

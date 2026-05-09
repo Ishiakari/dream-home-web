@@ -1,6 +1,6 @@
-'use client'; // Required for framer-motion and useState
+'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import SearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '@/components/cards/PropertyCard';
@@ -10,7 +10,7 @@ import PropertyDialog from '@/components/cards/property/PropertyDialog';
 
 import { usePublicProperties } from '@/hooks/usePublicProperties';
 import { toDialogProperty } from '@/lib/properties/toDialogProperty';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
 const faqs = [
   {
@@ -30,192 +30,36 @@ const faqs = [
   },
 ];
 
-function parseNumberOrEmpty(value) {
-  if (value === null || value === undefined) return '';
-  const n = Number(value);
-  return Number.isFinite(n) ? n : '';
-}
-
-function buildFiltersFromSearchParams(searchParams) {
-  return {
-    where: searchParams.get('where') || '',
-    minPrice: parseNumberOrEmpty(searchParams.get('minPrice')),
-    maxPrice: parseNumberOrEmpty(searchParams.get('maxPrice')),
-    minRooms: parseNumberOrEmpty(searchParams.get('minRooms')),
-  };
-}
-
-function toQueryString(filters) {
-  const params = new URLSearchParams();
-
-  const where = String(filters?.where || '').trim();
-  if (where) params.set('where', where);
-
-  const minPrice = filters?.minPrice;
-  const maxPrice = filters?.maxPrice;
-  const minRooms = filters?.minRooms;
-
-  if (minPrice !== '' && minPrice !== null && minPrice !== undefined && !Number.isNaN(Number(minPrice))) {
-    params.set('minPrice', String(minPrice));
-  }
-  if (maxPrice !== '' && maxPrice !== null && maxPrice !== undefined && !Number.isNaN(Number(maxPrice))) {
-    params.set('maxPrice', String(maxPrice));
-  }
-  if (minRooms !== '' && minRooms !== null && minRooms !== undefined && !Number.isNaN(Number(minRooms))) {
-    params.set('minRooms', String(minRooms));
-  }
-
-  return params.toString();
-}
-
-function shallowEqualFilters(a, b) {
-  return (
-    (a?.where ?? '') === (b?.where ?? '') &&
-    String(a?.minPrice ?? '') === String(b?.minPrice ?? '') &&
-    String(a?.maxPrice ?? '') === String(b?.maxPrice ?? '') &&
-    String(a?.minRooms ?? '') === String(b?.minRooms ?? '')
-  );
-}
+// Pre-filter: only houses
+const houseOnlyFilter = (p) => String(p?.property_type || '').toLowerCase() === 'house';
 
 export default function HouseListingPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const qsString = searchParams.toString(); // ✅ stable dependency
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
-  // ✅ load real properties from backend (available-only from hook)
+  // ✅ Data fetching
   const { properties, isLoading, errorMsg } = usePublicProperties();
 
-  // ✅ Controlled filters for SearchBar (URL synced)
-  const [filters, setFilters] = useState({
-    where: '',
-    minPrice: '',
-    maxPrice: '',
-    minRooms: '',
+  // ✅ Shared filter/sort/URL-sync hook with house-only pre-filter
+  const {
+    filters,
+    setFilters,
+    sortBy,
+    setSortBy,
+    sortedProperties,
+    resultsCount,
+  } = usePropertyFilters({
+    properties,
+    isLoading,
+    errorMsg,
+    basePath: '/properties/house-listings',
+    preFilter: houseOnlyFilter,
   });
-
-  // ✅ Sorting state (no "Newest")
-  // allowed: price_asc | price_desc | rooms_desc
-  const [sortBy, setSortBy] = useState('price_asc');
-
-  // Refs to prevent URL/state loops (landing -> page navigation etc.)
-  const didHydrateRef = useRef(false);
-  const lastWrittenQsRef = useRef(null);
-  const didInitFromUrlRef = useRef(false);
-
-  // 0) Initialize from URL ONCE on first mount
-  useEffect(() => {
-    if (didInitFromUrlRef.current) return;
-
-    const next = buildFiltersFromSearchParams(searchParams);
-    setFilters(next);
-
-    didHydrateRef.current = true;
-    didInitFromUrlRef.current = true;
-
-    lastWrittenQsRef.current = qsString;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 1) URL -> state (ONLY when URL changed NOT caused by our own typing)
-  useEffect(() => {
-    if (!didInitFromUrlRef.current) return;
-    if (lastWrittenQsRef.current === qsString) return;
-
-    const next = buildFiltersFromSearchParams(searchParams);
-    setFilters((prev) => (shallowEqualFilters(prev, next) ? prev : next));
-  }, [qsString, searchParams]);
-
-  // 2) state -> URL (live typing), loop-safe
-  useEffect(() => {
-    if (!didHydrateRef.current) return;
-    if (!didInitFromUrlRef.current) return;
-
-    const nextQs = toQueryString(filters);
-    if (nextQs === qsString) return;
-
-    lastWrittenQsRef.current = nextQs;
-
-    router.replace(
-      nextQs ? `/properties/house-listings?${nextQs}` : '/properties/house-listings',
-      { scroll: false }
-    );
-  }, [filters, router, qsString]);
 
   const handleOpenDialog = (propertyFromApi) => {
     setSelectedProperty(toDialogProperty(propertyFromApi));
     setIsDialogOpen(true);
   };
-
-  // ✅ Step 1: filter to houses only
-  const houseOnly = useMemo(() => {
-    return (properties || []).filter((p) => String(p?.property_type || '').toLowerCase() === 'house');
-  }, [properties]);
-
-  // ✅ Step 2: apply search filters (where/price/rooms)
-  const filteredHouses = useMemo(() => {
-    const q = String(filters.where || '').trim().toLowerCase();
-
-    const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
-    const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
-    const minRooms = filters.minRooms === '' ? null : Number(filters.minRooms);
-
-    const hasMinPrice = Number.isFinite(minPrice);
-    const hasMaxPrice = Number.isFinite(maxPrice);
-    const hasMinRooms = Number.isFinite(minRooms);
-
-    return (houseOnly || []).filter((p) => {
-      // where text
-      if (q) {
-        const hay = [p.title, p.street, p.area, p.city, p.postcode, p.property_type]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        if (!hay.includes(q)) return false;
-      }
-
-      // price
-      const rent = Number(p.monthly_rent);
-      if (hasMinPrice && Number.isFinite(rent) && rent < minPrice) return false;
-      if (hasMaxPrice && Number.isFinite(rent) && rent > maxPrice) return false;
-
-      // rooms
-      const rooms = Number(p.no_of_rooms);
-      if (hasMinRooms && Number.isFinite(rooms) && rooms < minRooms) return false;
-
-      return true;
-    });
-  }, [houseOnly, filters]);
-
-  // ✅ Step 3: sort
-  const sortedHouses = useMemo(() => {
-    const list = [...filteredHouses];
-
-    const rentValue = (p) => {
-      const n = Number(p?.monthly_rent);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    const roomsValue = (p) => {
-      const n = Number(p?.no_of_rooms);
-      return Number.isFinite(n) ? n : 0;
-    };
-
-    list.sort((a, b) => {
-      if (sortBy === 'price_asc') return rentValue(a) - rentValue(b);
-      if (sortBy === 'price_desc') return rentValue(b) - rentValue(a);
-      if (sortBy === 'rooms_desc') return roomsValue(b) - roomsValue(a);
-      return 0;
-    });
-
-    return list;
-  }, [filteredHouses, sortBy]);
-
-  // ✅ Results count should reflect filtered + sorted list
-  const resultsCount = sortedHouses.length;
 
   return (
     <div className="bg-white min-h-screen">
@@ -267,11 +111,11 @@ export default function HouseListingPage() {
           <p className="text-sm text-slate-600">Loading house listings...</p>
         ) : errorMsg ? (
           <p className="text-sm text-red-600">{errorMsg}</p>
-        ) : sortedHouses.length === 0 ? (
+        ) : sortedProperties.length === 0 ? (
           <p className="text-sm text-slate-600">No house listings found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedHouses.map((prop, index) => {
+            {sortedProperties.map((prop, index) => {
               const key = prop.property_no ?? prop.id ?? `house-${index}`;
 
               const cardProperty = {
