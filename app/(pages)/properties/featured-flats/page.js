@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import HorizontalPropertyCard from '@/components/cards/HorizontalPropertyCard';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -154,12 +155,12 @@ export default function FeaturedFlatsPage() {
             title="Other Featured Flats"
             subtitle="Browse our curated selection of premium city apartments."
           />
-          <button className="hidden md:flex items-center gap-2 text-sm font-semibold text-[#003580] border border-[#003580]/30 px-5 py-2.5 rounded-xl hover:bg-[#003580] hover:text-white transition">
+          <Link href="/properties/area-search?type=flat" className="hidden md:flex items-center gap-2 text-sm font-semibold text-[#003580] border border-[#003580]/30 px-5 py-2.5 rounded-xl hover:bg-[#003580] hover:text-white transition">
             View All
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
         </div>
 
         {isLoading ? (
@@ -207,12 +208,12 @@ export default function FeaturedFlatsPage() {
 
         {/* Mobile view all */}
         <div className="mt-8 text-center md:hidden">
-          <button className="inline-flex items-center gap-2 bg-[#003580] text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#002a6e] transition">
+          <Link href="/properties/area-search?type=flat" className="inline-flex items-center gap-2 bg-[#003580] text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#002a6e] transition">
             View All Flats
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
         </div>
       </section>
 
