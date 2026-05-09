@@ -83,10 +83,10 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col items-center w-full px-4 md:px-8 bg-white overflow-hidden">
+    <div className="flex flex-col items-center w-full px-4 md:px-8 bg-white">
       {/* --- HERO SECTION (Animates on Load) --- */}
       <motion.section
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 1, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="text-center max-w-4xl mx-auto mt-20 md:mt-10 mb-12 space-y-6 relative z-30"

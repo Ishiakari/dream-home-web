@@ -16,6 +16,7 @@ function parseNumberOrEmpty(value) {
 function buildFiltersFromSearchParams(searchParams) {
   return {
     where: searchParams.get('where') || '',
+    type: searchParams.get('type') || '',
     minPrice: parseNumberOrEmpty(searchParams.get('minPrice')),
     maxPrice: parseNumberOrEmpty(searchParams.get('maxPrice')),
     minRooms: parseNumberOrEmpty(searchParams.get('minRooms')),
@@ -27,6 +28,9 @@ function toQueryString(filters) {
 
   const where = String(filters?.where || '').trim();
   if (where) params.set('where', where);
+
+  const type = String(filters?.type || '').trim();
+  if (type) params.set('type', type);
 
   const minPrice = filters?.minPrice;
   const maxPrice = filters?.maxPrice;
@@ -48,6 +52,7 @@ function toQueryString(filters) {
 function shallowEqualFilters(a, b) {
   return (
     (a?.where ?? '') === (b?.where ?? '') &&
+    (a?.type ?? '') === (b?.type ?? '') &&
     String(a?.minPrice ?? '') === String(b?.minPrice ?? '') &&
     String(a?.maxPrice ?? '') === String(b?.maxPrice ?? '') &&
     String(a?.minRooms ?? '') === String(b?.minRooms ?? '')
@@ -60,6 +65,7 @@ function shallowEqualFilters(a, b) {
 
 function applyFilters(properties, filters) {
   const q = String(filters.where || '').trim().toLowerCase();
+  const typeFilter = String(filters.type || '').trim().toLowerCase();
 
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
@@ -78,6 +84,14 @@ function applyFilters(properties, filters) {
         .toLowerCase();
 
       if (!hay.includes(q)) return false;
+    }
+
+    // Property Type
+    if (typeFilter) {
+      const pType = String(p.property_type || '').toLowerCase();
+      // Match exactly if specified (e.g. 'flat' only shows flats)
+      if (typeFilter === 'flat' && pType !== 'flat') return false;
+      if (typeFilter === 'house' && pType !== 'house') return false;
     }
 
     // Price
@@ -150,6 +164,7 @@ export function usePropertyFilters({
   // Controlled filters
   const [filters, setFilters] = useState({
     where: '',
+    type: '',
     minPrice: '',
     maxPrice: '',
     minRooms: '',

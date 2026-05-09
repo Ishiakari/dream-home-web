@@ -19,6 +19,7 @@ function useDebouncedValue(value, delayMs) {
     // ✅ Always keep local input values as STRINGS (never null)
     const [local, setLocal] = useState(() => ({
         where: value?.where ?? "",
+        type: value?.type ?? "",
         minPrice: value?.minPrice ?? "",
         maxPrice: value?.maxPrice ?? "",
         minRooms: value?.minRooms ?? "",
@@ -29,6 +30,7 @@ function useDebouncedValue(value, delayMs) {
         if (!value) return;
         setLocal({
         where: value.where ?? "",
+        type: value.type ?? "",
         minPrice: value.minPrice ?? "",
         maxPrice: value.maxPrice ?? "",
         minRooms: value.minRooms ?? "",
@@ -50,6 +52,7 @@ function useDebouncedValue(value, delayMs) {
 
         return {
         where: local.where ?? "",
+        type: local.type ?? "",
         minPrice: Number.isFinite(minPrice) ? minPrice : null,
         maxPrice: Number.isFinite(maxPrice) ? maxPrice : null,
         minRooms: Number.isFinite(minRooms) ? minRooms : null,

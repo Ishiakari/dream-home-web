@@ -66,8 +66,23 @@ export default function AreaSearchPage() {
           {/* live typing on area-search */}
           <SearchBar value={filters} onChange={setFilters} onSearch={setFilters} debounceMs={250} />
 
-          {/* ✅ SORT ONLY (pill row removed) */}
-          <div className="flex items-center justify-end w-full mt-6 px-2 text-slate-700">
+          {/* ✅ Property Type and Sort Row */}
+          <div className="flex flex-wrap items-center justify-between w-full mt-6 px-2 text-slate-700 gap-4">
+            {/* Left: Type Filter */}
+            <div className="text-sm font-semibold flex items-center gap-2">
+              Property Type:
+              <select
+                value={filters.type || ''}
+                onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+                className="text-[#003580] bg-transparent font-semibold cursor-pointer outline-none"
+              >
+                <option value="">All Types</option>
+                <option value="flat">Flats Only</option>
+                <option value="house">Houses Only</option>
+              </select>
+            </div>
+
+            {/* Right: Sort By */}
             <div className="text-sm font-semibold flex items-center gap-2">
               Sort by:
               <select
