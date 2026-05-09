@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Building2, Home, KeyRound, Search } from "lucide-react";
 import { getUserRoleFlags } from "@/lib/auth/roles";
 import AddPropertyForm from "./AddPropertyForm";
+import RenterViewingsPanel from "./RenterViewingsPanel";
 
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -163,17 +164,20 @@ export default function ProfileRolePanels({ user }) {
   return (
     <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
       {isRenter ? (
-        <RolePanel
-          icon={Search}
-          title="Renter Dashboard"
-          description="Track and manage your renting journey in one place."
-          items={[
-            "Review saved property searches",
-            "Track active viewing requests",
-            "Monitor application and lease progress",
-          ]}
-          primaryAction={{ href: "/properties/house", label: "Browse Properties" }}
-        />
+        <article className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-[#003580]">My Viewings</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Your scheduled and past property viewings.
+              </p>
+            </div>
+            <div className="rounded-full bg-[#003580]/10 p-2 text-[#003580]">
+              <Search className="h-5 w-5" />
+            </div>
+          </div>
+          <RenterViewingsPanel />
+        </article>
       ) : null}
 
       {isOwner ? (
