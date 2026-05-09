@@ -3,29 +3,24 @@ import Link from 'next/link';
 const FOOTER_CONFIG = {
     sections: [
         {
-        title: 'Explore',
+        title: 'Properties',
         links: [
-            { name: 'Featured Flats', href: '/properties/featured-flats' },
             { name: 'House Listings', href: '/properties/house-listings' },
-            { name: 'Branch Locations', href: '/about#branches-section' },
-            { name: 'How it Works', href: '#' },
+            { name: 'Area Search', href: '/properties/area-search' },
+            { name: 'Featured Flats', href: '/properties/featured-flats' },
         ],
         },
         {
-        title: 'Services',
+        title: 'Company',
         links: [
-            { name: 'List Your Property', href: '#' },
-            { name: 'Renter Guide', href: '#' },
-            { name: 'Lease Terms', href: '#' },
-            { name: 'Area Search', href: '#' },
+            { name: 'About Us', href: '/about' },
+            { name: 'Branch Locations', href: '/about#branches-section' },
         ],
         },
         {
         title: 'Support',
         links: [
-            { name: 'Contact Us', href: '#' },
-            { name: 'FAQ', href: '#' },
-            { name: 'Privacy Policy', href: '#' },
+            { name: 'Contact Us', href: '/about#contact-section' },
         ],
         },
     ],
@@ -90,7 +85,7 @@ const PublicFooter = () => {
                 ))}
                 <span className="hidden sm:inline text-slate-700">|</span>
                 <span className="text-slate-400 italic font-serif lowercase tracking-normal normal-case">
-                DreamHome Case Study [cite: 2]
+                DreamHome Case Study
                 </span>
             </div>
             </div>
