@@ -28,8 +28,8 @@ import {
 	const PASSWORD_RESET_SUCCESS_MESSAGE =
 	"If an account exists for this email, password reset instructions have been sent.";
 
-	// ✅ confirmed working endpoint
-	const CLIENTS_LIST_ENDPOINT = "/users/clients/";
+	// ✅ Use the fast, authenticated "me" endpoint instead of querying all clients
+	const CURRENT_USER_ENDPOINT = "/users/me/";
 
 	function getFirstError(errors = {}) {
 	const firstKey = Object.keys(errors)[0];
@@ -37,26 +37,12 @@ import {
 	}
 
 	async function fetchClientNo({ token }) {
-	const data = await apiClient.get(CLIENTS_LIST_ENDPOINT, { token });
-
-	const list = Array.isArray(data)
-		? data
-		: Array.isArray(data?.results)
-		? data.results
-		: [];
-
-	if (!list.length) return null;
-
-	const match =
-		list.find(
-		(c) =>
-			typeof c?.client_no === "string" &&
-			c.client_no.trim() &&
-			String(c?.role || "").toLowerCase() === "owner"
-		) || list.find((c) => typeof c?.client_no === "string" && c.client_no.trim());
-
-	const clientNo = match?.client_no;
-	return typeof clientNo === "string" && clientNo.trim() ? clientNo : null;
+	try {
+		const data = await apiClient.get(CURRENT_USER_ENDPOINT, { token });
+		return data?.user?.client_no || null;
+	} catch {
+		return null;
+	}
 	}
 
 	export function useAuth() {
