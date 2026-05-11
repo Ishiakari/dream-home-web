@@ -113,6 +113,8 @@ export default function AdvertisementPopup() {
               src="/PlaceHolderProperties.jpg"
               alt="Advertisement"
               fill
+              sizes="(max-width: 640px) 100vw, 520px"
+              loading="eager"
               className="object-cover"
             />
           </div>

@@ -136,7 +136,13 @@ export default function FeaturedFlatsPage() {
                 className="flex flex-col items-center gap-2 text-center group cursor-pointer"
               >
                 <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Image src={agent.image} alt={agent.name} fill className="object-cover" />
+                  <Image
+                    src={agent.image}
+                    alt={agent.name}
+                    fill
+                    sizes="(max-width: 768px) 80px, 96px"
+                    className="object-cover"
+                  />
                 </div>
                 <p className="text-sm font-bold text-gray-900 group-hover:text-[#003580] transition-colors">
                   {agent.name}
