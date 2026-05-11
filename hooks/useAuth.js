@@ -247,13 +247,11 @@ import {
 	}, [enrichUserWithClientNo, refreshAccessToken]);
 
 	useEffect(() => {
-		// ✅ IMPORTANT: do NOT call enrichUserWithClientNo here (it causes loops).
 		const unsubscribe = subscribeToSessionChanges((session) => {
 		if (!session?.accessToken) {
 			setUser(null);
 			return;
 		}
-
 		setUser(buildUserFromToken(session.accessToken, session.user));
 		});
 
