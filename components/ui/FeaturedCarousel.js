@@ -56,7 +56,7 @@ export default function FeaturedCarousel({ properties, onPropertyClick }) {
                     return (
                         <div
                             key={key}
-                            className="min-w-[280px] md:min-w-[320px] max-w-[320px] snap-center shrink-0"
+                            className="min-w-[240px] md:min-w-[260px] max-w-[260px] snap-center shrink-0"
                         >
                             <PropertyCard
                                 property={cardProperty}
