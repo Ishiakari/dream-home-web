@@ -10,6 +10,7 @@ import PropertyCard from '../components/cards/PropertyCard';
 import BlogTestimonialsSection from '@/components/sections/BlogTestimonialsSection';
 import AccordionItem from '@/components/ui/AccordionItem';
 import WhyChooseUs from '@/components/ui/WhyChooseUs';
+import FeaturedCarousel from '@/components/ui/FeaturedCarousel';
 import { blogTestimonials } from '@/lib/data/blogTestimonials';
 
 import PropertyDialog from '@/components/cards/property/PropertyDialog';
@@ -91,10 +92,10 @@ export default function HomePage() {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="text-center max-w-4xl mx-auto mt-20 md:mt-10 mb-12 space-y-6 relative z-30"
       >
-        <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight">
+        <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
           Find your perfect <span className="text-[#E11553]">DreamHome</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
           Discover top-tier PH properties tailored to your lifestyle. Search by location, price range, and rooms.
         </p>
       </motion.section>
@@ -115,7 +116,7 @@ export default function HomePage() {
         initial={{ opacity: 0, scale: 0.95, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.4, ease: 'easeOut' }}
-        className="w-full max-w-5xl relative z-10 -mt-16 md:-mt-24 h-[400px] md:h-[600px]"
+        className="w-full max-w-6xl relative z-10 -mt-16 md:-mt-24 h-[300px] md:h-[450px]"
       >
         <Image
           src="/PropertyExampleIntro.jpg"
@@ -135,9 +136,9 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-100px' }}
         transition={{ duration: 0.8 }}
-        className="w-full max-w-7xl mx-auto mt-20"
+        className="w-full max-w-[1400px] mx-auto mt-16 px-2"
       >
-        <div className="flex items-end justify-between gap-4 mb-8">
+        <div className="flex items-end justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Explore Destinations</h2>
             <p className="text-gray-500 mt-1 text-sm">
@@ -153,30 +154,10 @@ export default function HomePage() {
         ) : landingProperties.length === 0 ? (
           <p className="text-sm text-slate-600">No available properties found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {landingProperties.map((p, idx) => {
-              const key = p.property_no ?? p.id ?? `home-${idx}`;
-
-              const cardProperty = {
-                id: p.property_no ?? p.id,
-                type: p.property_type,
-                city: p.city,
-                street: p.street,
-                postcode: p.postcode,
-                noOfRooms: p.no_of_rooms,
-                status: p.status,
-                monthlyRent: p.monthly_rent,
-              };
-
-              return (
-                <PropertyCard
-                  key={key}
-                  property={cardProperty}
-                  onViewDetails={() => handleOpenDialog(p)}
-                />
-              );
-            })}
-          </div>
+          <FeaturedCarousel 
+            properties={landingProperties} 
+            onPropertyClick={handleOpenDialog} 
+          />
         )}
       </motion.section>
 

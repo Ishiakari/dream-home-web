@@ -16,9 +16,9 @@ export default function PropertyCard({ property, onViewDetails }) {
 
     return (
         <Wrapper {...wrapperProps}>
-            <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100">
+            <div className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
                 {/* Image Section */}
-                <div className="relative h-56 w-full group overflow-hidden rounded-t-3xl">
+                <div className="relative h-48 w-full group overflow-hidden rounded-t-2xl">
                     {/* Status badge */}
                     {(() => {
                         const badge = STATUS_BADGE[property.status] ?? { label: property.status ?? 'For Rent', className: 'bg-[#0A4DA1] text-white' };
@@ -56,11 +56,11 @@ export default function PropertyCard({ property, onViewDetails }) {
                 </div>
 
                 {/* Text Details */}
-                <div className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="p-4">
+                    <h2 className="text-lg font-bold text-gray-900 mb-1 truncate">
                         {property.type} in {property.city}
                     </h2>
-                    <p className="text-gray-500 text-base mb-6">
+                    <p className="text-gray-500 text-sm mb-4 truncate">
                         {property.street}, {property.postcode}
                     </p>
 
@@ -69,33 +69,33 @@ export default function PropertyCard({ property, onViewDetails }) {
                         {/* Left side */}
                         <div className="flex gap-4 text-gray-700 min-w-0 flex-wrap">
                             {/* Bed Icon & Rooms */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    width="22"
-                                    height="22"
+                                    width="18"
+                                    height="18"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="2"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    className="text-gray-500"
+                                    className="text-gray-400"
                                 >
                                     <path d="M2 4v16" />
                                     <path d="M2 8h18a2 2 0 0 1 2 2v10" />
                                     <path d="M2 17h20" />
                                     <path d="M6 8v9" />
                                 </svg>
-                                <span className="font-medium text-lg">{property.noOfRooms}</span>
+                                <span className="font-medium text-sm">{property.noOfRooms} bd</span>
                             </div>
 
                             {/* House Icon & Status */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    width="22"
-                                    height="22"
+                                    width="18"
+                                    height="18"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     strokeWidth="1.5"
@@ -106,14 +106,14 @@ export default function PropertyCard({ property, onViewDetails }) {
                                 >
                                     <path d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                                 </svg>
-                                <span className="font-medium text-lg text-teal-600 whitespace-nowrap">
+                                <span className="font-medium text-sm text-teal-600 whitespace-nowrap">
                                     {property.status}
                                 </span>
                             </div>
                         </div>
 
                         {/* Price Tag */}
-                        <div className="bg-blue-700 text-white font-bold text-base md:text-lg py-2 px-4 md:px-5 rounded-md shrink-0 whitespace-nowrap">
+                        <div className="bg-blue-700 text-white font-bold text-sm md:text-base py-1.5 px-3 rounded-md shrink-0 whitespace-nowrap">
                             {formatMoneyPHP(property.monthlyRent)}
                         </div>
                     </div>
