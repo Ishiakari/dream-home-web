@@ -19,7 +19,7 @@ import {
 
 	const LOGIN_ENDPOINT = "/token/";
 	const REFRESH_ENDPOINT = "/token/refresh/";
-	const SIGNUP_ENDPOINT = "/users/clients/";
+	const SIGNUP_ENDPOINT = "/users/signup/";
 	const PASSWORD_RESET_ENDPOINTS = [
 	"/users/password-reset/",
 	"/users/password-reset-request/",
