@@ -233,11 +233,8 @@ import {
 			updatedSession?.accessToken
 				? buildUserFromToken(updatedSession.accessToken, updatedSession.user)
 				: null;
-
 			setUser(nextUser);
 			setIsLoading(false);
-
-			// ✅ Enrich once after refresh/hydration
 			enrichUserWithClientNo(nextUser);
 		}
 		};
