@@ -44,12 +44,11 @@ export default function PropertyInquiryForm({ agent, propertyId }) {
       }
 
       // POST /api/properties/viewings/
-      // Backend expects: property_no, renter_no, view_date, comments
+      // Backend expects: property_no, view_date, comments
       await apiClient.post("properties/viewings/", {
         token,
         data: {
           property_no: propertyId,
-          renter_no: user?.client_no || user?.clientNo,
           view_date: viewDate,
           comments: comments.trim() || null,
         },
