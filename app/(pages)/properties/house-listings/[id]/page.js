@@ -40,7 +40,7 @@ export default async function PropertyDetailPage({ params }) {
                         price={`${formatMoneyPHP(property.monthly_rent || property.monthlyRent)}/mo`}
                         tags={[property.status, property.property_type || property.type].filter(Boolean)}
                     />
-                    <PropertyImageGallery images={["/PlaceHolderPic.png"]} alt={property.title || "Property"} />
+                    <PropertyImageGallery images={["/PlaceHolderProperties.jpg"]} alt={property.title || "Property"} />
                 </div>
 
                 {/* Right: inquiry form */}

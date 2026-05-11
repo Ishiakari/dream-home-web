@@ -9,7 +9,7 @@ export default function HeroPropertyCard({
   bathrooms = 2,
   status = 'For Sale',
   tag = 'Featured',
-  imageSrc = '/PlaceHolderPic.png'
+  imageSrc = '/PlaceHolderProperties.jpg'
 }) {
   return (
     <div className="relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer w-full">

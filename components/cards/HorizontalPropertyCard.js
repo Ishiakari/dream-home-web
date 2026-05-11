@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function HorizontalPropertyCard({ 
     propertyNo = "P001",
-    imageSrc = "/PlaceHolderPic.png", 
+    imageSrc = "/PlaceHolderProperties.jpg", 
     price = "850",
     title = "Modern Flat in City Centre",
     address = "123 High Street, Glasgow",

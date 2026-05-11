@@ -30,7 +30,7 @@ export default function PropertyCard({ property, onViewDetails }) {
                     })()}
 
                     <Image
-                        src="/PlaceHolderPic.png"
+                        src="/PlaceHolderProperties.jpg"
                         alt={`Property in ${property.city}`}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

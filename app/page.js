@@ -9,6 +9,7 @@ import PrimarySearchBar from '@/components/ui/SearchBar';
 import PropertyCard from '../components/cards/PropertyCard';
 import BlogTestimonialsSection from '@/components/sections/BlogTestimonialsSection';
 import AccordionItem from '@/components/ui/AccordionItem';
+import AdvertisementPopup from '@/components/ui/AdvertisementPopup';
 import WhyChooseUs from '@/components/ui/WhyChooseUs';
 import FeaturedCarousel from '@/components/ui/FeaturedCarousel';
 import { blogTestimonials } from '@/lib/data/blogTestimonials';
@@ -85,6 +86,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center w-full px-4 md:px-8 bg-white">
+      <AdvertisementPopup />
       {/* --- HERO SECTION (Animates on Load) --- */}
       <motion.section
         initial={{ opacity: 1, y: 30 }}
