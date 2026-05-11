@@ -85,30 +85,69 @@ function useDebouncedValue(value, delayMs) {
             <div className="w-[1px] h-8 bg-gray-200 hidden sm:block" />
 
             {/* Price */}
-            <div className="hidden sm:flex flex-col justify-center flex-1 h-full px-6 sm:px-8 hover:bg-gray-100 transition-colors text-left">
+            <div className="hidden sm:flex flex-col justify-center flex-1 h-full px-6 sm:px-8 hover:bg-gray-100 transition-colors text-left relative group cursor-pointer">
             <span className="text-xs font-bold text-gray-800 tracking-wide">
-                Price
+                Price Range
             </span>
             <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-[#E11553]">₱</span>
                 <input
                 inputMode="numeric"
                 value={local.minPrice ?? ""}
                 onChange={(e) =>
                     setLocal((s) => ({ ...s, minPrice: e.target.value }))
                 }
-                className="w-24 text-sm text-gray-700 bg-transparent outline-none placeholder:text-gray-500"
+                className="w-16 text-sm text-gray-900 font-semibold bg-transparent outline-none placeholder:text-gray-400 placeholder:font-normal"
                 placeholder="Min"
                 />
-                <span className="text-gray-400 text-sm">-</span>
+                <span className="text-gray-300 text-sm">-</span>
+                <span className="text-sm font-bold text-[#E11553]">₱</span>
                 <input
                 inputMode="numeric"
                 value={local.maxPrice ?? ""}
                 onChange={(e) =>
                     setLocal((s) => ({ ...s, maxPrice: e.target.value }))
                 }
-                className="w-24 text-sm text-gray-700 bg-transparent outline-none placeholder:text-gray-500"
+                className="w-16 text-sm text-gray-900 font-semibold bg-transparent outline-none placeholder:text-gray-400 placeholder:font-normal"
                 placeholder="Max"
                 />
+            </div>
+
+            {/* Advanced Slider Dropdown (appears on hover) */}
+            <div className="absolute top-full left-0 mt-4 w-72 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 translate-y-2 group-hover:translate-y-0">
+                <p className="text-xs font-bold text-gray-400 mb-6 uppercase tracking-wider">Adjust Budget</p>
+                
+                <div className="space-y-6">
+                    {/* Min Slider */}
+                    <div>
+                        <div className="flex justify-between items-center text-xs font-semibold text-gray-600 mb-3">
+                            <span>Minimum</span>
+                            <span className="bg-gray-100 px-2 py-1 rounded text-[#003580]">₱{local.minPrice || 0}</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="0" max="3000" step="50"
+                            value={local.minPrice || 0}
+                            onChange={(e) => setLocal(s => ({ ...s, minPrice: e.target.value }))}
+                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#003580]"
+                        />
+                    </div>
+
+                    {/* Max Slider */}
+                    <div>
+                        <div className="flex justify-between items-center text-xs font-semibold text-gray-600 mb-3">
+                            <span>Maximum</span>
+                            <span className="bg-gray-100 px-2 py-1 rounded text-[#E11553]">₱{local.maxPrice || 5000}</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="500" max="10000" step="100"
+                            value={local.maxPrice || 10000}
+                            onChange={(e) => setLocal(s => ({ ...s, maxPrice: e.target.value }))}
+                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#E11553]"
+                        />
+                    </div>
+                </div>
             </div>
             </div>
 

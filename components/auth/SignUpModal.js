@@ -6,6 +6,7 @@ import { Eye, EyeOff, UserPlus, X } from "lucide-react";
 import { FormInput } from "@/components/ui/FormInput";
 import { RoleSelector } from "@/components/ui/RoleSelector";
 import { useAuth } from "@/hooks/useAuth";
+import { validateForm, signupValidators } from "@/lib/validator";
 
 const INITIAL_FORM = {
     firstName: "",
@@ -67,6 +68,17 @@ export default function SignUpModal({
     const handleSubmit = async (event) => {
         event.preventDefault();
         setFormErrors({});
+
+        const localErrors = validateForm(form, signupValidators);
+
+        if (form.password !== form.confirmPassword) {
+            localErrors.confirmPassword = "Passwords do not match.";
+        }
+
+        if (Object.keys(localErrors).length > 0) {
+            setFormErrors(localErrors);
+            return;
+        }
 
         const result = await signup(form);
 

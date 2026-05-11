@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LogIn, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeEmail } from "@/lib/auth/validation";
+import { validateForm, loginValidators } from "@/lib/validator";
 
 const INITIAL_FORM = {
     email: "",
@@ -23,12 +24,14 @@ export default function LogInModal({
 
     const [form, setForm] = useState(INITIAL_FORM);
     const [formError, setFormError] = useState("");
+    const [formErrors, setFormErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setForm(INITIAL_FORM);
             setFormError("");
+            setFormErrors({});
             setShowPassword(false);
             clearError();
             return;
@@ -59,6 +62,13 @@ export default function LogInModal({
     const handleSubmit = async (event) => {
         event.preventDefault();
         setFormError("");
+        setFormErrors({});
+
+        const localErrors = validateForm(form, loginValidators);
+        if (Object.keys(localErrors).length > 0) {
+            setFormErrors(localErrors);
+            return;
+        }
 
         const result = await login({
             email: normalizeEmail(form.email),
@@ -121,6 +131,9 @@ export default function LogInModal({
                             className="w-full rounded-lg border border-gray-300 bg-white text-gray-900 px-4 py-2 outline-none transition focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/20"
                             placeholder="you@example.com"
                         />
+                        {formErrors.email ? (
+                            <p className="mt-1 text-xs text-red-600">{formErrors.email}</p>
+                        ) : null}
                     </div>
 
                     <div>
@@ -146,6 +159,9 @@ export default function LogInModal({
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
+                        {formErrors.password ? (
+                            <p className="mt-1 text-xs text-red-600">{formErrors.password}</p>
+                        ) : null}
                     </div>
 
                     <div className="flex items-center justify-between text-sm">
