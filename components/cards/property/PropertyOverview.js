@@ -18,8 +18,8 @@ export default function PropertyOverview({ propertyType, yearBuilt, bathrooms, b
     { icon: <Home className="h-4 w-4 text-gray-400" />, label: "Property Type", value: propertyType },
     { icon: <CalendarDays className="h-4 w-4 text-gray-400" />, label: "Year Built", value: yearBuilt },
     { icon: <Bath className="h-4 w-4 text-gray-400" />, label: "Bathrooms", value: bathrooms },
-    { icon: <BedDouble className="h-4 w-4 text-gray-400" />, label: "Bedrooms", value: bedrooms },
-  ];
+    { icon: <BedDouble className="h-4 w-4 text-gray-400" />, label: "Rooms", value: bedrooms },
+  ].filter(item => item.value !== null && item.value !== undefined);
 
   return (
     <section className="border border-gray-200 rounded-xl p-4 mb-4">

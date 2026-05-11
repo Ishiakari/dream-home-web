@@ -13,9 +13,9 @@
 export default function PropertyDetails({ propertyId, propertyType, bedrooms, status }) {
   const items = [
     { label: "Property ID", value: propertyId },
-    { label: "Property Type:", value: propertyType },
-    { label: "Bedrooms", value: bedrooms },
-  ];
+    { label: "Property Type", value: propertyType },
+    { label: "Rooms", value: bedrooms },
+  ].filter(item => item.value !== null && item.value !== undefined);
 
   return (
     <section className="border border-gray-200 rounded-xl p-4 mb-4">
