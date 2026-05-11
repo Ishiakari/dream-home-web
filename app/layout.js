@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "DreamHome | UK Property Management",
-  description: "DreamHome | UK Property Management",
+  title: "DreamHome",
+  description: "DreamHome",
 };
 
 export default function RootLayout({ children }) {
