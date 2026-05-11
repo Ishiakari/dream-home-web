@@ -10,6 +10,7 @@ import PropertyCard from '../components/cards/PropertyCard';
 import BlogTestimonialsSection from '@/components/sections/BlogTestimonialsSection';
 import AccordionItem from '@/components/ui/AccordionItem';
 import WhyChooseUs from '@/components/ui/WhyChooseUs';
+import FeaturedCarousel from '@/components/ui/FeaturedCarousel';
 import { blogTestimonials } from '@/lib/data/blogTestimonials';
 
 import PropertyDialog from '@/components/cards/property/PropertyDialog';
@@ -153,30 +154,10 @@ export default function HomePage() {
         ) : landingProperties.length === 0 ? (
           <p className="text-sm text-slate-600">No available properties found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {landingProperties.map((p, idx) => {
-              const key = p.property_no ?? p.id ?? `home-${idx}`;
-
-              const cardProperty = {
-                id: p.property_no ?? p.id,
-                type: p.property_type,
-                city: p.city,
-                street: p.street,
-                postcode: p.postcode,
-                noOfRooms: p.no_of_rooms,
-                status: p.status,
-                monthlyRent: p.monthly_rent,
-              };
-
-              return (
-                <PropertyCard
-                  key={key}
-                  property={cardProperty}
-                  onViewDetails={() => handleOpenDialog(p)}
-                />
-              );
-            })}
-          </div>
+          <FeaturedCarousel 
+            properties={landingProperties} 
+            onPropertyClick={handleOpenDialog} 
+          />
         )}
       </motion.section>
 
