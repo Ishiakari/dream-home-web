@@ -45,6 +45,15 @@ const NavBar = () => {
     setIsProfileMenuOpen(false);
   }, [pathname]);
 
+  // Ensure modals close automatically when user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoginOpen(false);
+      setIsSignupOpen(false);
+      setIsMobileMenuOpen(false);
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (!isProfileMenuOpen) {
       return;
